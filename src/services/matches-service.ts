@@ -1,0 +1,58 @@
+import { sportPredictionApi } from "./api/sport-prediction-api";
+
+
+export const getAllMatches = async () => {
+
+    try {
+        const { data } = await sportPredictionApi.get<any[]>('matchs')
+
+        const matchs = data;
+
+        // console.log(`matchs`, matchs);
+
+        return matchs;
+
+
+    } catch (error) {
+        console.error(error);
+    }
+
+}
+
+export const getMatchesByDate = async (matchDateStart: string, matchDateEnd: string) => {
+
+    try {
+        const { data } = await sportPredictionApi.get<any[]>(`matchs/by/matchfordate/${matchDateStart}/${matchDateEnd}`)
+
+        const matchs = data;
+
+        // console.log(`matchs`, matchs);
+
+        return matchs;
+
+
+    } catch (error) {
+        console.error(error);
+    }
+
+
+
+}
+
+
+export const getMatchesById = async (matchId: number) => {
+
+    try {
+        const { data } = await sportPredictionApi.get<any[]>(`matchs/${matchId}`)
+
+        const matchs = data;
+
+        // console.log(`matchs`, matchs);
+
+        return matchs;
+
+
+    } catch (error) {
+        console.error(error);
+    }
+}
