@@ -5,6 +5,7 @@ import { Image } from "expo-image";
 import { Formik } from 'formik';
 import { useState } from "react";
 // import React, { useState } from "react";
+import { AuthUser } from "@/src/interfaces/auth-user";
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import * as Yup from 'yup';
@@ -13,23 +14,12 @@ import { useAuthContext } from "../../src/context/AuthContext";
 
 
 export default function LoginScreen() {
-    // const myImage = require('./img/imgcreateuser.png');
-    // const routeBackGen = 'http://192.168.12.199:3000/';
 
-    // const [email, setEmail] = useState("");
-    // const [password, setPassword] = useState("");
-    // const [confirmPassword, setConfirmPassword] = useState("");
-    // const [name, setName] = useState("");
-    // const [phone, setPhone] = useState("");
-    // const [textErrorEmail, showMessageErroEmail] = useState(false)
-
-
-    const validationSchema = Yup.object({ // O usa tu propia validación
+    const validationSchema = Yup.object({ 
         email: Yup.string().email('Email inválido').required('El email es requerido'),
-        // name: Yup.string().required('El nombre es requerido'),
+
         password: Yup.string().required('La contraseña es obligatoria'),
-        // phone: Yup.string().required('El telefono es obligatorio'),
-        // confirmPassword: Yup.string().required('Debe confirmar la contraseña')
+
     });
 
 
@@ -37,34 +27,19 @@ export default function LoginScreen() {
 
 
 
-    // function showSwal() {
 
-    //     return Alert.alert('Registro Participante', 'Te has registro exitosamente.', [
-    //         // {
-    //         //     text: 'Cancel',
-    //         //     onPress: () => console.log('Cancel Pressed'),
-    //         //     style: 'cancel',
-    //         // },
-    //         { text: 'OK', onPress: () => router.navigate('/') },
-    //     ]);
-
-    // }
-
-    // function showModalErrorMatchPasword() {
-
-    //     return Alert.alert('Upss!', 'Lo sentimos, por favor valida que las contraseñas coincidan.', [
-    //         // {
-    //         //     text: 'Cancel',
-    //         //     onPress: () => console.log('Cancel Pressed'),
-    //         //     style: 'cancel',
-    //         // },
-    //         { text: 'OK', onPress: () => { } },
-    //     ]);
-    // }
     const handleSubmit = (values: any, { resetForm }: any) => {
 
+        const authLogin:AuthUser = {
+            email: values.email,
+            password: values.password
+        }
 
-        loginWithEmailPassword(values.email, values.password);
+        // console.log('responseDataLogin ',responseDataLogin);
+        
+
+
+        loginWithEmailPassword(authLogin);
         // console.log('isAuthenticated ', isAuthenticated);
 
 

@@ -18,18 +18,17 @@ export interface Teams {
 
 export interface Match {
 
-    item: {
 
-        id: number;
-        match_date: Date;
-        stage: string;
-        home_score: null;
-        away_score: null;
-        homeTeam: Team;
-        awayTeam: Team;
-        stadium: string;
 
-    }
+    id: number;
+    match_date: Date;
+    stage: string;
+    home_score: null;
+    away_score: null;
+    homeTeam: Team;
+    awayTeam: Team;
+    stadium: string;
+
 
 }
 

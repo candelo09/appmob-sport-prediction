@@ -5,6 +5,8 @@ import {
     useEffect,
     useState,
 } from 'react';
+import { AuthUser } from '../interfaces/auth-user';
+import login from '../services/login-service';
 
 enum AuthStatus {
     'checking' = 'checking',
@@ -21,20 +23,20 @@ interface AuthState {
     isAuthenticated: boolean;
 
     // Methods
-    loginWithEmailPassword: (email: string, password: string) => void;
+    loginWithEmailPassword: (authLogin: AuthUser) => void;
     logout: () => void;
 }
 
 interface User {
     firstname: string;
-    surname:string;
+    surname: string;
     email: string;
     phone: string;
 }
 
-function showModalErrorMatchPasword() {
+function showModalErrorMatchPasword(message: string) {
 
-    return alert(`Upss!, Lo sentimos, Credenciales incorrectas`);
+    return alert(`${message}`);
 }
 
 export const AuthContext = createContext({} as AuthState);
@@ -53,20 +55,33 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
 
 
-    const loginWithEmailPassword = (email: string, password: string) => {
+    const loginWithEmailPassword = async (authLogin: AuthUser) => {
         // console.log(password);
 
-        if (email === 'crisannpc@gmail.com' && password === '1234') {
-            setUser({
-                firstname: 'Cristhian',
-                email: email,
-                phone: '3188618159',
-                surname: 'Candelo'
-            });
-            setStatus(AuthStatus.authenticated);
-        } else {
-            showModalErrorMatchPasword();
+        try {
+            const data = await login(authLogin);
+
+            console.log('data ', data);
+
+
+            if (data !== undefined) {
+                setUser({
+                    firstname: "Cristhian",
+                    email: authLogin.email,
+                    phone: '3188618159',
+                    surname: 'Candelo'
+                });
+                setStatus(AuthStatus.authenticated);
+            } else {
+                showModalErrorMatchPasword('Upss!, Lo sentimos, Credenciales incorrectas');
+            }
+        } catch (error: any) {
+            console.error(error);
+
+
+            showModalErrorMatchPasword('Upss!, Lo sentimos, Credenciales incorrectas');
         }
+
 
     };
 

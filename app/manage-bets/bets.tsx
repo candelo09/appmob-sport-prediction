@@ -103,16 +103,15 @@ export default function BetsScreen() {
 
 
 
-    function renderItem({ item }: Match) {
+    function renderItem({ item }: { item: Match }) {
         // console.log(item);
 
         return (
             <Pressable
                 style={styles.card}
                 onPress={() => {
-                    console.log('item.id ', item.id)
                     setShowModalBet(true);
-                    setMatchId({ item });
+                    setMatchId( item );
                 }}
 
             >
@@ -150,8 +149,9 @@ export default function BetsScreen() {
                 <SelectMatchForDay></SelectMatchForDay>
 
 
+                {showModalBet ? (<>
+                    <MatchModal visible={showModalBet} matchId={matchId} onClose={() => setShowModalBet(false)} ></MatchModal></>) : <></>}
 
-                <MatchModal visible={showModalBet} matchId={matchId} onClose={() => setShowModalBet(false)} ></MatchModal>
 
                 {/* <View style={styles.searchBox}>
                     <TextInput
@@ -197,7 +197,7 @@ export default function BetsScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#071226' },
+    container: { flex: 1, backgroundColor: '#071226', overflowX:'scroll', overscrollBehaviorY:'none' },
     header: {
         height: 64,
         paddingHorizontal: 16,

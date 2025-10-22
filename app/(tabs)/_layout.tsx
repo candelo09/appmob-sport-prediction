@@ -9,6 +9,8 @@ import DrawerNavigation from '../drawer/menuListLoggedInUser';
 import LoginScreen from '../login/login';
 import UserScreen from '../user/user';
 
+import { TableRankingBets } from '@/src/components/rankingBets/tableRankingBets';
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 // export const unstable_settings = {
 //   anchor: '(tabs)',
 // };
@@ -24,15 +26,21 @@ export default function RootLayout() {
     <>
       {isAuthenticated ? (<Tab.Navigator>
         <Tab.Screen name="Principal" component={DrawerNavigation} options={{ headerShown: false, tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} /> }} />
-        <Tab.Screen name="Usuario" component={UserScreen} options={{ tabBarIcon: ({ color }) => <Entypo size={28} name="user" color={color} />, headerTintColor: '#ffff', headerStyle: { backgroundColor: '#474a50ff' }, headerTitle: ({ children }) => <View>
-          <Text style={{fontSize:20, color:'#ffff'}}>Perfil</Text>
-          <Text style={styles.titleLogLogin}>{user?.firstname} {user?.surname}</Text>
-          </View> , }} />
+        <Tab.Screen name="Ranking Participantes" component={TableRankingBets} options={{ tabBarIcon: ({ color }) => <FontAwesome6 name="ranking-star" size={24} color="black" />, headerStyle: { backgroundColor: '#474a50ff' }, headerTintColor:'#fff' }} />
+        <Tab.Screen name="Usuario" component={UserScreen} options={{
+          tabBarIcon: ({ color }) => <Entypo size={28} name="user" color="black" />, headerTintColor: '#ffff', headerStyle: { backgroundColor: '#474a50ff' }, headerTitle: ({ children }) => <View>
+            <Text style={{ fontSize: 20, color: '#ffff' }}>Perfil</Text>
+            <Text style={styles.titleLogLogin}>{user?.firstname} {user?.surname}</Text>
+          </View>,
+        }} />
+
       </Tab.Navigator>)
         :
         (<Tab.Navigator>
           <Tab.Screen name="Principal" component={DrawerNavigation} options={{ headerShown: false, tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} /> }} />
-          <Tab.Screen name="Ingresar" component={LoginScreen} options={{ headerShown: false, tabBarIcon: ({ color }) => <Entypo size={28} name="login" color={color} /> }} />
+          <Tab.Screen name="Ranking Participantes" component={TableRankingBets} options={{ tabBarIcon: ({ color }) => <FontAwesome6 name="ranking-star" size={24} color="black" />, headerStyle: { backgroundColor: '#474a50ff' },headerTintColor:'#fff' }} />
+          <Tab.Screen name="Ingresar" component={LoginScreen} options={{ headerShown: false, tabBarIcon: ({ color }) => <Entypo size={28} name="login" color="black" /> }} />
+
         </Tab.Navigator>)}
     </>
 
