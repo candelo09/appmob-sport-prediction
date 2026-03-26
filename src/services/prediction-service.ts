@@ -1,40 +1,88 @@
 import { Prediction } from "../interfaces/prediction";
 import { sportPredictionApi } from "./api/sport-prediction-api";
 
+export const getAllPredictionByParticipant = async (id: number) => {
+  try {
+    const { data } = await sportPredictionApi.get<Prediction[]>(
+      `/predictions/by/participant/${id}`,
+    );
 
+    const predictionsByParticipant = data;
 
-export const getAllPredictionByParticipant = async (id:number) => {
+    return {
+      predictionsByParticipant,
+    };
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-    try {
+export const getAllPredictionByMatch = async (match_id: number) => {
+  try {
+    const { data } = await sportPredictionApi.get<Prediction[]>(
+      `/predictions/by/match/${match_id}`,
+    );
 
-        const { data } = await sportPredictionApi.get<Prediction[]>(`/predictions/${id}`)
+    const predictionsByMatch = data;
 
-        const predictionsByParticipant = data;
+    return {
+      predictionsByMatch,
+    };
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-        return {
-            predictionsByParticipant
-        }
+export const getAllPredictionByParticipantAndMatch = async (
+  user_id: number,
+  match_id: number,
+) => {
+  try {
+    const { data } = await sportPredictionApi.get<Prediction>(
+      `/predictions/by/participant/match/${user_id}/${match_id}`,
+    );
 
-    } catch (error) {
-        console.error(error);
-    }
+    const betByParticipant = data;
 
-}
+    return betByParticipant;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 export const createPrediction = async (prediction: Prediction) => {
+  try {
+    const { data } = await sportPredictionApi.post<Prediction[]>(
+      `/predictions`,
+      prediction,
+    );
 
-    try {
-        const { data } = await sportPredictionApi.post<Prediction[]>(`/predictions`, prediction)
+    const predictions = data;
 
-        const predictions = data;
+    // console.log(`predictions`, predictions);
 
-        // console.log(`predictions`, predictions);
+    return { predictions };
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-        return {predictions};
+export const updatePrediction = async (
+  prediction_id: number,
+  prediction: Prediction,
+) => {
+  try {
+    const { data } = await sportPredictionApi.patch<Prediction[]>(
+      `/predictions/${prediction_id}`,
+      prediction,
+    );
 
+    const predictions = data;
 
-    } catch (error) {
-        console.error(error);
-    }
+    // console.log(`predictions`, predictions);
 
-}
+    return { predictions };
+  } catch (error) {
+    console.error(error);
+  }
+};

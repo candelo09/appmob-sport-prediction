@@ -1,6 +1,6 @@
-import { useMatchs, useMatchsByDate } from "@/hooks/use-matchs";
-import MatchModal from "@/src/components/Bets/betMatch";
+import { usePrediction } from "@/hooks/use-prediction";
 import { Match } from "@/src/interfaces/matchs";
+import { Prediction } from "@/src/interfaces/prediction";
 import { Picker } from "@react-native-picker/picker";
 import { useRoute } from "@react-navigation/native";
 import React, { useCallback, useEffect, useState } from "react";
@@ -11,6 +11,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 
@@ -20,21 +21,26 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 // import Menu from '@/src/components/menuListHomeLogin/menuListLoggedInUser';
 
 // HomeScreen: lista de partidos (ejemplo: mundial) + botón para ir a Login
-export default function BetsScreen() {
+
+export default function PersonalBetsScreen() {
   const route = useRoute();
   const { userId } = route.params as { userId: number };
 
-  const { allMatchsQuery } = useMatchs();
+  // console.log(userId);
 
-  const { matchsByDateQuery } = useMatchsByDate(new Date(), new Date());
+  const { predictionByIdQuery } = usePrediction(userId);
+
+  // console.log(
+  //   `predictionByIdQuery`,
+  //   predictionByIdQuery.data?.predictionsByParticipant,
+  // );
+
+  useEffect(() => {
+    predictionByIdQuery.refetch();
+  });
 
   const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    allMatchsQuery.refetch();
-    matchsByDateQuery.refetch();
-  });
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -43,29 +49,35 @@ export default function BetsScreen() {
     setRefreshing(false);
   }, []);
 
-  const filtered = allMatchsQuery.data?.filter((m) => {
-    const q = query.toLowerCase().trim();
-    if (!q) return true;
-    return (
-      m.homeTeam.name.toLowerCase().includes(q) ||
-      m.awayTeam.name.toLowerCase().includes(q) ||
-      m.stadium.toLowerCase().includes(q) ||
-      m.stage.includes(q) ||
-      m.group.letter.includes(q)
-    );
-  });
+  const filtered = predictionByIdQuery.data?.predictionsByParticipant.filter(
+    (m) => {
+      const q = query.toLowerCase().trim();
+      if (!q) return true;
+      return (
+        m.matchId.homeTeam.name.toLowerCase().includes(q) ||
+        m.matchId.awayTeam.name.toLowerCase().includes(q) ||
+        m.matchId.stadium.toLowerCase().includes(q) ||
+        m.predicted_away_score ||
+        m.predicted_home_score ||
+        m.matchId.group.letter
+      );
+    },
+  );
 
-  const filteredbyToday = matchsByDateQuery.data?.filter((m) => {
-    const q = query.toLowerCase().trim();
-    if (!q) return true;
-    return (
-      m.homeTeam.name.toLowerCase().includes(q) ||
-      m.awayTeam.name.toLowerCase().includes(q) ||
-      m.stadium.toLowerCase().includes(q) ||
-      m.stage.includes(q) ||
-      m.group.letter.includes(q)
-    );
-  });
+  // const filteredbyToday =
+  //   predictionByIdQuery.data?.predictionsByParticipant.filter((m) => {
+  //     const q = query.toLowerCase().trim();
+  //     if (!q) return true;
+  //     return (
+  //       m.matchId.homeTeam.name.toLowerCase().includes(q) ||
+  //       m.matchId.awayTeam.name.toLowerCase().includes(q) ||
+  //       m.matchId.stadium.toLowerCase().includes(q) ||
+  //       m.predicted_away_score ||
+  //       m.predicted_home_score ||
+  //       m.matchId.group.letter ||
+  //       m.matchId.stage
+  //     );
+  //   });
 
   // console.log(`filtered`, filtered);
 
@@ -111,60 +123,43 @@ export default function BetsScreen() {
 
   const [matchId, setMatchId] = useState({} as Match);
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "En Juego":
-        return "#28a745"; // verde
-      case "Finalizado":
-        return "#dc3545"; // rojo
-      case "Por Jugar":
-        return "#ffc107"; // amarillo
-      default:
-        return "#ffffff";
-    }
-  };
-
-  function renderItem({ item }: { item: Match }) {
-    const color = getStatusColor(item.stage);
-    const match_date = new Date(item.match_date);
-    const date_now = new Date();
-
-    const diffMs = match_date.getTime() - date_now.getTime();
-    const diffMinutes = diffMs / (1000 * 60);
+  function renderItem({ item }: { item: Prediction }) {
+    // console.log("item ", item.matchId.group.letter);
 
     return (
       <Pressable
         style={styles.card}
         onPress={() => {
-          if (diffMinutes <= 0) {
-            alert(
-              "¡Ups! El tiempo para realizar apuestas en este partido ya ha finalizado.",
-            );
-            return;
-          }
           setShowModalBet(true);
-          setMatchId(item);
+          setMatchId(item.matchId);
         }}
       >
         <View style={styles.teamsRow}>
           <View style={styles.team}>
-            <Image source={{ uri: item.homeTeam!.flag }} style={styles.flag} />
-            <Text style={styles.teamName}>{item.homeTeam!.name}</Text>
+            <Image
+              source={{ uri: item.matchId.homeTeam!.flag }}
+              style={styles.flag}
+            />
+            <Text style={styles.teamName}>{item.matchId.homeTeam!.name}</Text>
+            <Text style={{ color: "#ffff" }}>{item.predicted_home_score}</Text>
           </View>
 
           <Text style={styles.vs}>vs</Text>
-
+          <Text style={{ color: "#ffff" }}>{item.predicted_away_score}</Text>
           <View style={styles.teamRight}>
-            <Text style={styles.teamName}>{item.awayTeam.name}</Text>
-            <Image source={{ uri: item.awayTeam.flag }} style={styles.flag} />
+            <Text style={styles.teamName}>{item.matchId.awayTeam.name}</Text>
+            <Image
+              source={{ uri: item.matchId.awayTeam.flag }}
+              style={styles.flag}
+            />
           </View>
         </View>
 
         <View style={styles.metaRow}>
-          <Text style={styles.date}>{formatDate(item.match_date)}</Text>
-          <Text style={styles.stadium}>{item.stadium}</Text>
-          <Text style={{ color, fontWeight: "bold" }}>{item.stage}</Text>
-          <Text style={styles.stadium}>Grupo {item.group?.letter || ""}</Text>
+          <Text style={styles.date}>{formatDate(item.matchId.match_date)}</Text>
+          <Text style={styles.stadium}>{item.matchId.stadium}</Text>
+          <Text style={styles.stadium}>Grupo {item.matchId.group.letter}</Text>
+          {/* <Text style={styles.stage}>{item.matchId.stage}</Text> */}
         </View>
       </Pressable>
     );
@@ -173,33 +168,19 @@ export default function BetsScreen() {
   return (
     <SafeAreaProvider style={styles.container}>
       <SafeAreaView>
-        <SelectMatchForDay></SelectMatchForDay>
+        {/* <SelectMatchForDay></SelectMatchForDay> */}
+        <View style={styles.searchBox}>
+          <TextInput
+            placeholder="Buscar equipo o estadio"
+            value={query}
+            onChangeText={setQuery}
+            style={styles.searchInput}
+          />
+        </View>
 
-        {showModalBet ? (
-          <>
-            <MatchModal
-              visible={showModalBet}
-              userId={userId}
-              matchId={matchId}
-              onClose={() => setShowModalBet(false)}
-            ></MatchModal>
-          </>
-        ) : (
-          <></>
-        )}
-
-        {/* <View style={styles.searchBox}>
-                    <TextInput
-                        placeholder="Buscar equipo o estadio"
-                        value={query}
-                        onChangeText={setQuery}
-                        style={styles.searchInput}
-                    />
-                </View> */}
-
-        {value === "0" ? (
-          <>
-            <FlatList
+        {/* {value === "0" ? ( */}
+        <>
+          {/* <FlatList
               data={filteredbyToday}
               // keyExtractor={({ item }: any) => item.id}
               renderItem={renderItem}
@@ -214,28 +195,29 @@ export default function BetsScreen() {
                   </Text>
                 </View>
               )}
-            />
-          </>
-        ) : (
-          <>
-            <FlatList
-              data={filtered}
-              // keyExtractor={({ item }: any) => item.id}
-              renderItem={renderItem}
-              contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
-              refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }
-              ListEmptyComponent={() => (
-                <View style={styles.empty}>
-                  <Text style={styles.emptyText}>
-                    No hay partidos para mostrar
-                  </Text>
-                </View>
-              )}
-            />
-          </>
-        )}
+            /> */}
+        </>
+        {/* ) : (
+          
+        )} */}
+        <>
+          <FlatList
+            data={filtered}
+            // keyExtractor={({ item }: any) => item.id}
+            renderItem={renderItem}
+            contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }
+            ListEmptyComponent={() => (
+              <View style={styles.empty}>
+                <Text style={styles.emptyText}>
+                  No hay partidos para mostrar
+                </Text>
+              </View>
+            )}
+          />
+        </>
       </SafeAreaView>
     </SafeAreaProvider>
   );
@@ -298,7 +280,7 @@ const styles = StyleSheet.create({
   },
   team: { flexDirection: "row", alignItems: "center", gap: 8 },
   teamRight: { flexDirection: "row", alignItems: "center", gap: 8 },
-  flag: { width: 42, height: 28, resizeMode: "cover", borderRadius: 4 },
+  flag: { width: 20, height: 20, resizeMode: "cover", borderRadius: 4 },
   teamName: { color: "#e6f2ff", fontWeight: "700", marginHorizontal: 8 },
   vs: { color: "#9fb8d6", fontWeight: "700" },
 
@@ -309,6 +291,7 @@ const styles = StyleSheet.create({
   },
   date: { color: "#9fb8d6" },
   stadium: { color: "#9fb8d6" },
+  stage: { color: "#d69f9f", fontWeight: 700 },
 
   empty: { padding: 40, alignItems: "center" },
   emptyText: { color: "#9fb8d6" },

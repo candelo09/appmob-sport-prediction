@@ -4,39 +4,39 @@ import {
     useContext,
     useEffect,
     useState,
-} from 'react';
-import { AuthUser } from '../interfaces/auth-user';
-import login from '../services/login-service';
+} from "react";
+import { AuthUser } from "../interfaces/auth-user";
+import { Participant } from "../interfaces/participants";
+import login from "../services/login-service";
 
 enum AuthStatus {
-    'checking' = 'checking',
-    'authenticated' = 'authenticated',
-    'unauthenticated' = 'unauthenticated',
+  "checking" = "checking",
+  "authenticated" = "authenticated",
+  "unauthenticated" = "unauthenticated",
 }
 
 interface AuthState {
-    status: AuthStatus;
-    token?: string;
+  status: AuthStatus;
+  token?: string;
 
-    user?: User;
-    isChecking: boolean;
-    isAuthenticated: boolean;
+  user?: Participant;
+  isChecking: boolean;
+  isAuthenticated: boolean;
 
-    // Methods
-    loginWithEmailPassword: (authLogin: AuthUser) => void;
-    logout: () => void;
+  // Methods
+  loginWithEmailPassword: (authLogin: AuthUser) => void;
+  logout: () => void;
 }
 
-interface User {
-    firstname: string;
-    surname: string;
-    email: string;
-    phone: string;
-}
+// interface User {
+//     firstname: string;
+//     surname: string;
+//     email: string;
+//     phone: string;
+// }
 
 function showModalErrorMatchPasword(message: string) {
-
-    return alert(`${message}`);
+  return alert(`${message}`);
 }
 
 export const AuthContext = createContext({} as AuthState);
@@ -44,68 +44,70 @@ export const AuthContext = createContext({} as AuthState);
 export const useAuthContext = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-    const [status, setStatus] = useState(AuthStatus.checking);
-    const [user, setUser] = useState<User>();
+  const [status, setStatus] = useState(AuthStatus.checking);
+  const [user, setUser] = useState<Participant>();
 
-    useEffect(() => {
-        setTimeout(() => {
-            setStatus(AuthStatus.unauthenticated);
-        }, 1500);
-    }, []);
+  useEffect(() => {
+    setTimeout(() => {
+      setStatus(AuthStatus.unauthenticated);
+    }, 1500);
+  }, []);
 
+  const loginWithEmailPassword = async (authLogin: AuthUser) => {
+    // console.log(password);
 
+    try {
+      const data = await login(authLogin);
 
-    const loginWithEmailPassword = async (authLogin: AuthUser) => {
-        // console.log(password);
+      // console.log('data ', data);
 
-        try {
-            const data = await login(authLogin);
+      if (data !== undefined) {
+        setUser({
+          created_at: data.created_at,
+          email: data.email,
+          firstname: data.firstname,
+          fullname: data.fullname,
+          id: data.id,
+          password: data.password,
+          phone: data.phone,
+          surname: data.surname,
+        });
+        setStatus(AuthStatus.authenticated);
+      } else {
+        showModalErrorMatchPasword(
+          "Upss!, Lo sentimos, Credenciales incorrectas",
+        );
+      }
+    } catch (error: any) {
+      console.error(error);
 
-            console.log('data ', data);
+      showModalErrorMatchPasword(
+        "Upss!, Lo sentimos, Credenciales incorrectas",
+      );
+    }
+  };
 
+  const logout = () => {
+    setUser(undefined);
+    setStatus(AuthStatus.unauthenticated);
+  };
 
-            if (data !== undefined) {
-                setUser({
-                    firstname: "Cristhian",
-                    email: authLogin.email,
-                    phone: '3188618159',
-                    surname: 'Candelo'
-                });
-                setStatus(AuthStatus.authenticated);
-            } else {
-                showModalErrorMatchPasword('Upss!, Lo sentimos, Credenciales incorrectas');
-            }
-        } catch (error: any) {
-            console.error(error);
+  return (
+    <AuthContext.Provider
+      value={{
+        status: status,
+        user: user,
 
+        // Getter
+        isChecking: status === AuthStatus.checking,
+        isAuthenticated: status === AuthStatus.authenticated,
 
-            showModalErrorMatchPasword('Upss!, Lo sentimos, Credenciales incorrectas');
-        }
-
-
-    };
-
-    const logout = () => {
-        setUser(undefined);
-        setStatus(AuthStatus.unauthenticated);
-    };
-
-    return (
-        <AuthContext.Provider
-            value={{
-                status: status,
-                user: user,
-
-                // Getter
-                isChecking: status === AuthStatus.checking,
-                isAuthenticated: status === AuthStatus.authenticated,
-
-                // Method
-                loginWithEmailPassword,
-                logout,
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
+        // Method
+        loginWithEmailPassword,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };

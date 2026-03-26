@@ -1,58 +1,49 @@
+import { Match } from "../interfaces/matchs";
 import { sportPredictionApi } from "./api/sport-prediction-api";
 
-
 export const getAllMatches = async () => {
+  try {
+    const { data } = await sportPredictionApi.get<Match[]>("matchs");
 
-    try {
-        const { data } = await sportPredictionApi.get<any[]>('matchs')
+    const matchs = data;
 
-        const matchs = data;
+    // console.log(`matchs`, matchs);
 
-        // console.log(`matchs`, matchs);
+    return matchs;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
-        return matchs;
+export const getMatchesByDate = async (
+  matchDateStart: string,
+  matchDateEnd: string,
+) => {
+  try {
+    const { data } = await sportPredictionApi.get<Match[]>(
+      `matchs/by/matchfordate/${matchDateStart}/${matchDateEnd}`,
+    );
 
+    const matchs = data;
 
-    } catch (error) {
-        console.error(error);
-    }
+    // console.log(`matchs`, matchs);
 
-}
-
-export const getMatchesByDate = async (matchDateStart: string, matchDateEnd: string) => {
-
-    try {
-        const { data } = await sportPredictionApi.get<any[]>(`matchs/by/matchfordate/${matchDateStart}/${matchDateEnd}`)
-
-        const matchs = data;
-
-        // console.log(`matchs`, matchs);
-
-        return matchs;
-
-
-    } catch (error) {
-        console.error(error);
-    }
-
-
-
-}
-
+    return matchs;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 export const getMatchesById = async (matchId: number) => {
+  try {
+    const { data } = await sportPredictionApi.get<any[]>(`matchs/${matchId}`);
 
-    try {
-        const { data } = await sportPredictionApi.get<any[]>(`matchs/${matchId}`)
+    const matchs = data;
 
-        const matchs = data;
+    // console.log(`matchs`, matchs);
 
-        // console.log(`matchs`, matchs);
-
-        return matchs;
-
-
-    } catch (error) {
-        console.error(error);
-    }
-}
+    return matchs;
+  } catch (error) {
+    console.error(error);
+  }
+};

@@ -1,5 +1,4 @@
 import { useMatchs, useMatchsByDate } from "@/hooks/use-matchs";
-import MatchModal from "@/src/components/Bets/betMatch";
 import { Match } from "@/src/interfaces/matchs";
 import { Picker } from "@react-native-picker/picker";
 import { useRoute } from "@react-navigation/native";
@@ -7,7 +6,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Image,
-  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
@@ -20,9 +18,8 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 // import Menu from '@/src/components/menuListHomeLogin/menuListLoggedInUser';
 
 // HomeScreen: lista de partidos (ejemplo: mundial) + botón para ir a Login
-export default function BetsScreen() {
+export default function ResultScreen() {
   const route = useRoute();
-  const { userId } = route.params as { userId: number };
 
   const { allMatchsQuery } = useMatchs();
 
@@ -51,7 +48,8 @@ export default function BetsScreen() {
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
       m.stage.includes(q) ||
-      m.group.letter.includes(q)
+      m.group.letter.includes(q) ||
+      m.home_score
     );
   });
 
@@ -63,7 +61,8 @@ export default function BetsScreen() {
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
       m.stage.includes(q) ||
-      m.group.letter.includes(q)
+      m.group.letter.includes(q) ||
+      m.away_score
     );
   });
 
@@ -107,9 +106,9 @@ export default function BetsScreen() {
     );
   };
 
-  const [showModalBet, setShowModalBet] = useState(false);
+  // const [showModalBet, setShowModalBet] = useState(false);
 
-  const [matchId, setMatchId] = useState({} as Match);
+  // const [matchId, setMatchId] = useState({} as Match);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -126,35 +125,20 @@ export default function BetsScreen() {
 
   function renderItem({ item }: { item: Match }) {
     const color = getStatusColor(item.stage);
-    const match_date = new Date(item.match_date);
-    const date_now = new Date();
-
-    const diffMs = match_date.getTime() - date_now.getTime();
-    const diffMinutes = diffMs / (1000 * 60);
 
     return (
-      <Pressable
-        style={styles.card}
-        onPress={() => {
-          if (diffMinutes <= 0) {
-            alert(
-              "¡Ups! El tiempo para realizar apuestas en este partido ya ha finalizado.",
-            );
-            return;
-          }
-          setShowModalBet(true);
-          setMatchId(item);
-        }}
-      >
+      <SafeAreaView style={styles.card}>
         <View style={styles.teamsRow}>
           <View style={styles.team}>
             <Image source={{ uri: item.homeTeam!.flag }} style={styles.flag} />
             <Text style={styles.teamName}>{item.homeTeam!.name}</Text>
+            <Text style={{ color: "#ffff" }}>{item.home_score}</Text>
           </View>
 
           <Text style={styles.vs}>vs</Text>
 
           <View style={styles.teamRight}>
+            <Text style={{ color: "#ffff" }}>{item.away_score}</Text>
             <Text style={styles.teamName}>{item.awayTeam.name}</Text>
             <Image source={{ uri: item.awayTeam.flag }} style={styles.flag} />
           </View>
@@ -166,7 +150,7 @@ export default function BetsScreen() {
           <Text style={{ color, fontWeight: "bold" }}>{item.stage}</Text>
           <Text style={styles.stadium}>Grupo {item.group?.letter || ""}</Text>
         </View>
-      </Pressable>
+      </SafeAreaView>
     );
   }
 
@@ -175,7 +159,7 @@ export default function BetsScreen() {
       <SafeAreaView>
         <SelectMatchForDay></SelectMatchForDay>
 
-        {showModalBet ? (
+        {/* {showModalBet ? (
           <>
             <MatchModal
               visible={showModalBet}
@@ -186,7 +170,7 @@ export default function BetsScreen() {
           </>
         ) : (
           <></>
-        )}
+        )} */}
 
         {/* <View style={styles.searchBox}>
                     <TextInput
@@ -298,7 +282,7 @@ const styles = StyleSheet.create({
   },
   team: { flexDirection: "row", alignItems: "center", gap: 8 },
   teamRight: { flexDirection: "row", alignItems: "center", gap: 8 },
-  flag: { width: 42, height: 28, resizeMode: "cover", borderRadius: 4 },
+  flag: { width: 20, height: 20, resizeMode: "cover", borderRadius: 4 },
   teamName: { color: "#e6f2ff", fontWeight: "700", marginHorizontal: 8 },
   vs: { color: "#9fb8d6", fontWeight: "700" },
 

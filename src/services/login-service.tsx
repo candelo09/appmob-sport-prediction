@@ -7,11 +7,14 @@ export default async function login(authLogin: AuthUser) {
     try {
         const { data } = await sportPredictionApi.post<Participant>('auth/login', authLogin)
 
-        const authUser = data;
+        const authUser: Participant = data;
+
+
+        return authUser;
 
         // console.log(`authUser`, authUser);
 
-        return authUser;
+
 
 
     } catch (error) {
