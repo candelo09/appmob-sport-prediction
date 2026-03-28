@@ -1,13 +1,10 @@
 import axios from "axios";
 
 export const sportPredictionApi = axios.create({
-  baseURL: "http://api_bet.chsystem.online/",
-  timeout: 5000,
+  baseURL: "https://api.chsystem.online/",
+  timeout: 15000,
   headers: {
+    Accept: "application/json",
     "Content-Type": "application/json",
   },
-  //   params: {
-  //     language: 'es-MX',
-  //     api_key: process.env.EXPO_PUBLIC_MOVIE_DB_KEY,
-  //   },
 });
