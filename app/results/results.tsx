@@ -9,6 +9,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 
@@ -130,7 +131,11 @@ export default function ResultScreen() {
       <SafeAreaView style={styles.card}>
         <View style={styles.teamsRow}>
           <View style={styles.team}>
-            <Image source={{ uri: item.homeTeam!.flag }} style={styles.flag} />
+            <Image
+              source={{ uri: item.homeTeam!.flag }}
+              resizeMode="cover"
+              style={styles.flag}
+            />
             <Text style={styles.teamName}>{item.homeTeam!.name}</Text>
             <Text style={{ color: "#ffff" }}>{item.home_score}</Text>
           </View>
@@ -140,13 +145,17 @@ export default function ResultScreen() {
           <View style={styles.teamRight}>
             <Text style={{ color: "#ffff" }}>{item.away_score}</Text>
             <Text style={styles.teamName}>{item.awayTeam.name}</Text>
-            <Image source={{ uri: item.awayTeam.flag }} style={styles.flag} />
+            <Image
+              source={{ uri: item.awayTeam.flag }}
+              resizeMode="cover"
+              style={styles.flag}
+            />
           </View>
         </View>
 
         <View style={styles.metaRow}>
           <Text style={styles.date}>{formatDate(item.match_date)}</Text>
-          <Text style={styles.stadium}>{item.stadium}</Text>
+          <Text style={styles.stadium}>Estadio {item.stadium}</Text>
           <Text style={{ color, fontWeight: "bold" }}>{item.stage}</Text>
           <Text style={styles.stadium}>Grupo {item.group?.letter || ""}</Text>
         </View>
@@ -157,6 +166,14 @@ export default function ResultScreen() {
   return (
     <SafeAreaProvider style={styles.container}>
       <SafeAreaView>
+        <View style={styles.searchBox}>
+          <TextInput
+            placeholder="Buscar equipo o estadio"
+            value={query}
+            onChangeText={setQuery}
+            style={styles.searchInput}
+          />
+        </View>
         <SelectMatchForDay></SelectMatchForDay>
 
         {/* {showModalBet ? (
@@ -282,7 +299,7 @@ const styles = StyleSheet.create({
   },
   team: { flexDirection: "row", alignItems: "center", gap: 8 },
   teamRight: { flexDirection: "row", alignItems: "center", gap: 8 },
-  flag: { width: 20, height: 20, resizeMode: "cover", borderRadius: 4 },
+  flag: { width: 20, height: 20, borderRadius: 4 },
   teamName: { color: "#e6f2ff", fontWeight: "700", marginHorizontal: 8 },
   vs: { color: "#9fb8d6", fontWeight: "700" },
 
@@ -377,7 +394,7 @@ const styles = StyleSheet.create({
     padding: 18,
     width: "100%",
     textAlign: "left",
-    outline: "none",
+    boxShadow: "none",
     fontSize: 15,
     transitionDelay: "0.4s",
   },

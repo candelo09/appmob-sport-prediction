@@ -1,6 +1,10 @@
+import { useMatchsByDate } from "@/hooks/use-matchs";
+import { useScoringRules } from "@/hooks/use-scoring-rules";
+import ScoringRulesModal from "@/src/components/scoring-rules/scoringRulesModal";
+// import ScoringRulesModal from "@/src/components/scoring-rules/scoringRulesModal";
 import { useAuthContext } from "@/src/context/AuthContext";
-import { Matchs } from "@/src/interfaces/matchs";
-import React, { useCallback, useState } from "react";
+import { Match } from "@/src/interfaces/matchs";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   Image,
@@ -11,6 +15,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Button } from "react-native-paper";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
 // import MenuListLoggedInUser from '../../src/components/menuListHomeLogin/menuListLoggedInUser';
@@ -19,33 +24,45 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 // HomeScreen: lista de partidos (ejemplo: mundial) + botón para ir a Login
 export default function HomeScreen() {
   // datos mock — en producción obténlos de tu API
-  const [matches] = useState([
-    {
-      id: "1",
-      date: "2026-06-14T18:00:00Z",
-      stadium: "Lusail Stadium",
-      teamA: { name: "Argentina", flag: "https://flagcdn.com/w320/ar.png" },
-      teamB: { name: "France", flag: "https://flagcdn.com/w320/fr.png" },
-    },
-    {
-      id: "2",
-      date: "2026-06-15T15:00:00Z",
-      stadium: "Al Bayt",
-      teamA: { name: "Brazil", flag: "https://flagcdn.com/w320/br.png" },
-      teamB: { name: "Spain", flag: "https://flagcdn.com/w320/es.png" },
-    },
-    {
-      id: "3",
-      date: "2026-06-16T20:00:00Z",
-      stadium: "Khalifa International",
-      teamA: { name: "Germany", flag: "https://flagcdn.com/w320/de.png" },
-      teamB: { name: "Portugal", flag: "https://flagcdn.com/w320/pt.png" },
-    },
-  ]);
+
+  // const [matches] = useState([
+  //   {
+  //     id: "1",
+  //     date: "2026-06-14T18:00:00Z",
+  //     stadium: "Lusail Stadium",
+  //     teamA: { name: "Argentina", flag: "https://flagcdn.com/w320/ar.png" },
+  //     teamB: { name: "France", flag: "https://flagcdn.com/w320/fr.png" },
+  //   },
+  //   {
+  //     id: "2",
+  //     date: "2026-06-15T15:00:00Z",
+  //     stadium: "Al Bayt",
+  //     teamA: { name: "Brazil", flag: "https://flagcdn.com/w320/br.png" },
+  //     teamB: { name: "Spain", flag: "https://flagcdn.com/w320/es.png" },
+  //   },
+  //   {
+  //     id: "3",
+  //     date: "2026-06-16T20:00:00Z",
+  //     stadium: "Khalifa International",
+  //     teamA: { name: "Germany", flag: "https://flagcdn.com/w320/de.png" },
+  //     teamB: { name: "Portugal", flag: "https://flagcdn.com/w320/pt.png" },
+  //   },
+  // ]);
 
   const { isAuthenticated, user } = useAuthContext();
   const [refreshing, setRefreshing] = useState(false);
+  const [showModalScoringRules, setShowModalScoringRules] = useState(false);
   const [query, setQuery] = useState("");
+
+  const { matchsByDateQuery } = useMatchsByDate(new Date(), new Date());
+
+  const { allScoringRules } = useScoringRules() || null;
+
+  useEffect(() => {
+    matchsByDateQuery.refetch();
+    allScoringRules.refetch();
+  });
+  // console.log("allScoringRules ", allScoringRules.data);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -54,43 +71,67 @@ export default function HomeScreen() {
     setRefreshing(false);
   }, []);
 
-  const filtered = matches.filter((m) => {
+  const filtered = matchsByDateQuery.data?.filter((m) => {
     const q = query.toLowerCase().trim();
     if (!q) return true;
     return (
-      m.teamA.name.toLowerCase().includes(q) ||
-      m.teamB.name.toLowerCase().includes(q) ||
+      m.homeTeam.name.toLowerCase().includes(q) ||
+      m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q)
     );
   });
 
-  function formatDate(iso: string | number | Date) {
-    const d = new Date(iso);
-    return d.toLocaleString();
-  }
+  // function formatDate(iso: string | number | Date) {
+  //   const d = new Date(iso);
+  //   return d.toLocaleString();
+  // }
 
-  function renderItem({ item }: Matchs) {
-    // console.log(item);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "En Juego":
+        return "#28a745"; // verde
+      case "Finalizado":
+        return "#dc3545"; // rojo
+      case "Por Jugar":
+        return "#ffc107"; // amarillo
+      default:
+        return "#ffffff";
+    }
+  };
 
+  function renderItem({ item }: { item: Match }) {
+    const color = getStatusColor(item.stage);
     return (
       <Pressable style={styles.card} onPress={() => {}}>
         <View style={styles.teamsRow}>
           <View style={styles.team}>
-            <Image source={{ uri: item.teamA!.flag }} style={styles.flag} />
-            <Text style={styles.teamName}>{item.teamA!.name}</Text>
+            <Image
+              source={{ uri: item.homeTeam!.flag }}
+              resizeMode="cover"
+              style={styles.flag}
+            />
+            <Text style={styles.teamName}>{item.homeTeam!.name}</Text>
+            <Text style={styles.teamName}>{item.home_score}</Text>
           </View>
 
           <Text style={styles.vs}>vs</Text>
 
           <View style={styles.teamRight}>
-            <Text style={styles.teamName}>{item.teamB.name}</Text>
-            <Image source={{ uri: item.teamB.flag }} style={styles.flag} />
+            <Text style={styles.teamName}>{item.away_score}</Text>
+            <Text style={styles.teamName}>{item.awayTeam.name}</Text>
+            <Image
+              source={{ uri: item.awayTeam.flag }}
+              resizeMode="cover"
+              style={styles.flag}
+            />
           </View>
         </View>
 
         <View style={styles.metaRow}>
-          <Text style={styles.date}>{formatDate(item.date)}</Text>
-          <Text style={styles.stadium}>{item.stadium}</Text>
+          {/* <Text style={styles.date}>{formatDate(item.match_date)}</Text> */}
+          <Text style={styles.stadium}>Grupo {item.group?.letter || ""}</Text>
+          <Text style={styles.stadium}>Estadio {item.stadium}</Text>
+          <Text style={{ color, fontWeight: "bold" }}>{item.stage}</Text>
         </View>
       </Pressable>
     );
@@ -136,9 +177,60 @@ export default function HomeScreen() {
           />
         </View>
 
+        <View style={styles.teamsRow}>
+          <Text
+            style={{
+              color: "#fff",
+              fontWeight: "bold",
+              fontSize: 15,
+              top: 10,
+              left: 10,
+            }}
+          >
+            PARTIDOS DEL DÍA
+          </Text>
+          <View style={styles.teamRight}>
+            <Button
+              style={{
+                backgroundColor: "rgb(231, 170, 71)",
+
+                height: 40,
+                // width: 50,
+                marginEnd: 15,
+              }}
+              onPress={() => {
+                setShowModalScoringRules(true);
+              }}
+            >
+              <Text
+                style={{
+                  color: "#fff",
+                  fontWeight: "bold",
+                  fontSize: 10,
+                  // bottom: 10,
+                  marginBottom: 20,
+                }}
+              >
+                Reglas
+              </Text>
+            </Button>
+          </View>
+          {showModalScoringRules ? (
+            <>
+              <ScoringRulesModal
+                visible={showModalScoringRules}
+                onClose={() => setShowModalScoringRules(false)}
+                scoringRules={allScoringRules.data || []}
+              ></ScoringRulesModal>
+            </>
+          ) : (
+            <></>
+          )}
+        </View>
+
         <FlatList
           data={filtered}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item: Match) => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
           refreshControl={
@@ -207,7 +299,7 @@ const styles = StyleSheet.create({
   },
   team: { flexDirection: "row", alignItems: "center", gap: 8 },
   teamRight: { flexDirection: "row", alignItems: "center", gap: 8 },
-  flag: { width: 42, height: 28, resizeMode: "cover", borderRadius: 4 },
+  flag: { width: 42, height: 28, borderRadius: 4 },
   teamName: { color: "#e6f2ff", fontWeight: "700", marginHorizontal: 8 },
   vs: { color: "#9fb8d6", fontWeight: "700" },
 
@@ -217,7 +309,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   date: { color: "#9fb8d6" },
-  stadium: { color: "#9fb8d6" },
+  stadium: { color: "#ffffff" },
 
   empty: { padding: 40, alignItems: "center" },
   emptyText: { color: "#9fb8d6" },

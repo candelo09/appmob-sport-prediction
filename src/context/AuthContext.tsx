@@ -1,12 +1,13 @@
+import { jwtDecode } from "jwt-decode";
 import {
-    createContext,
-    PropsWithChildren,
-    useContext,
-    useEffect,
-    useState,
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useState,
 } from "react";
 import { AuthUser } from "../interfaces/auth-user";
-import { Participant } from "../interfaces/participants";
+import { Login, Token } from "../interfaces/participants";
 import login from "../services/login-service";
 
 enum AuthStatus {
@@ -19,7 +20,7 @@ interface AuthState {
   status: AuthStatus;
   token?: string;
 
-  user?: Participant;
+  user?: Login;
   isChecking: boolean;
   isAuthenticated: boolean;
 
@@ -35,6 +36,13 @@ interface AuthState {
 //     phone: string;
 // }
 
+type JwtPayload = {
+  exp: number;
+  iat?: number;
+  sub?: string;
+  [key: string]: any;
+};
+
 function showModalErrorMatchPasword(message: string) {
   return alert(`${message}`);
 }
@@ -45,7 +53,7 @@ export const useAuthContext = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [status, setStatus] = useState(AuthStatus.checking);
-  const [user, setUser] = useState<Participant>();
+  const [user, setUser] = useState<Login>();
 
   useEffect(() => {
     setTimeout(() => {
@@ -56,21 +64,42 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const loginWithEmailPassword = async (authLogin: AuthUser) => {
     // console.log(password);
 
+    const readToken = (token: string) => {
+      try {
+        const decoded = jwtDecode<JwtPayload>(token);
+        // console.log("User Payload:", decoded);
+
+        // Example: Check if token is expired
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp < currentTime) {
+          console.warn("Token has expired");
+          setUser(undefined);
+          setStatus(AuthStatus.unauthenticated);
+        }
+
+        return decoded;
+      } catch (error) {
+        console.error("Invalid token format", error);
+      }
+    };
+
     try {
-      const data = await login(authLogin);
+      const data: Token = (await login(authLogin)) || { access_token: "" };
+
+      const user = readToken(data.access_token);
 
       // console.log('data ', data);
 
       if (data !== undefined) {
         setUser({
-          created_at: data.created_at,
-          email: data.email,
-          firstname: data.firstname,
-          fullname: data.fullname,
-          id: data.id,
-          password: data.password,
-          phone: data.phone,
-          surname: data.surname,
+          // created_at: data.created_at,
+          email: user?.email,
+          firstname: user?.firstname,
+          fullname: user?.fullname,
+          id: user?.id,
+          // // password: data.password,
+          // // phone: data.phone,
+          surname: user?.surname,
         });
         setStatus(AuthStatus.authenticated);
       } else {

@@ -56,10 +56,7 @@ export default function PersonalBetsScreen() {
       return (
         m.matchId.homeTeam.name.toLowerCase().includes(q) ||
         m.matchId.awayTeam.name.toLowerCase().includes(q) ||
-        m.matchId.stadium.toLowerCase().includes(q) ||
-        m.predicted_away_score ||
-        m.predicted_home_score ||
-        m.matchId.group.letter
+        m.matchId.stadium.toLowerCase().includes(q)
       );
     },
   );
@@ -138,6 +135,7 @@ export default function PersonalBetsScreen() {
           <View style={styles.team}>
             <Image
               source={{ uri: item.matchId.homeTeam!.flag }}
+              resizeMode="cover"
               style={styles.flag}
             />
             <Text style={styles.teamName}>{item.matchId.homeTeam!.name}</Text>
@@ -150,6 +148,7 @@ export default function PersonalBetsScreen() {
             <Text style={styles.teamName}>{item.matchId.awayTeam.name}</Text>
             <Image
               source={{ uri: item.matchId.awayTeam.flag }}
+              resizeMode="cover"
               style={styles.flag}
             />
           </View>
@@ -157,7 +156,7 @@ export default function PersonalBetsScreen() {
 
         <View style={styles.metaRow}>
           <Text style={styles.date}>{formatDate(item.matchId.match_date)}</Text>
-          <Text style={styles.stadium}>{item.matchId.stadium}</Text>
+          <Text style={styles.stadium}>Estadio {item.matchId.stadium}</Text>
           <Text style={styles.stadium}>Grupo {item.matchId.group.letter}</Text>
           {/* <Text style={styles.stage}>{item.matchId.stage}</Text> */}
         </View>
@@ -280,7 +279,7 @@ const styles = StyleSheet.create({
   },
   team: { flexDirection: "row", alignItems: "center", gap: 8 },
   teamRight: { flexDirection: "row", alignItems: "center", gap: 8 },
-  flag: { width: 20, height: 20, resizeMode: "cover", borderRadius: 4 },
+  flag: { width: 20, height: 20, borderRadius: 4 },
   teamName: { color: "#e6f2ff", fontWeight: "700", marginHorizontal: 8 },
   vs: { color: "#9fb8d6", fontWeight: "700" },
 
@@ -376,7 +375,7 @@ const styles = StyleSheet.create({
     padding: 18,
     width: "100%",
     textAlign: "left",
-    outline: "none",
+    boxShadow: "none",
     fontSize: 15,
     transitionDelay: "0.4s",
   },

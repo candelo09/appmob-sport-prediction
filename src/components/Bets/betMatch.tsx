@@ -121,6 +121,7 @@ export default function MatchModal({
               <View style={styles.team}>
                 <Image
                   source={{ uri: matchId.homeTeam!.flag }}
+                  resizeMode="cover"
                   style={styles.flag}
                 />
                 <TextInput
@@ -147,6 +148,7 @@ export default function MatchModal({
                 />
                 <Image
                   source={{ uri: matchId.awayTeam.flag }}
+                  resizeMode="cover"
                   style={styles.flag}
                 />
               </View>
@@ -268,7 +270,7 @@ const styles = StyleSheet.create({
   },
   team: { flexDirection: "row", alignItems: "center", gap: 8 },
   teamRight: { flexDirection: "row", alignItems: "center", gap: 8 },
-  flag: { width: 42, height: 28, resizeMode: "cover", borderRadius: 4 },
+  flag: { width: 42, height: 28, borderRadius: 4 },
   teamName: {
     backgroundColor: "#e6f2ff",
     fontWeight: "700",
@@ -368,7 +370,7 @@ const styles = StyleSheet.create({
     padding: 18,
     width: "100%",
     textAlign: "left",
-    outline: "none",
+    boxShadow: "none",
     fontSize: 15,
     transitionDelay: "0.4s",
   },
