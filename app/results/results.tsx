@@ -129,6 +129,10 @@ export default function ResultScreen() {
 
     return (
       <SafeAreaView style={styles.card}>
+        <View style={styles.metaRow}>
+          <Text style={styles.date}>{formatDate(item.match_date)}</Text>
+          <Text style={styles.group}>Grupo {item.group?.letter || ""}</Text>
+        </View>
         <View style={styles.teamsRow}>
           <View style={styles.team}>
             <Image
@@ -154,10 +158,8 @@ export default function ResultScreen() {
         </View>
 
         <View style={styles.metaRow}>
-          <Text style={styles.date}>{formatDate(item.match_date)}</Text>
           <Text style={styles.stadium}>Estadio {item.stadium}</Text>
           <Text style={{ color, fontWeight: "bold" }}>{item.stage}</Text>
-          <Text style={styles.stadium}>Grupo {item.group?.letter || ""}</Text>
         </View>
       </SafeAreaView>
     );
@@ -308,8 +310,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  date: { color: "#9fb8d6" },
+  date: { color: "#9fb8d6", bottom: 10 },
   stadium: { color: "#9fb8d6" },
+  group: { color: "#9fb8d6", bottom: 10 },
 
   empty: { padding: 40, alignItems: "center" },
   emptyText: { color: "#9fb8d6" },

@@ -1,24 +1,22 @@
 import { getByGroupStanding } from "@/src/services/group-standing-service";
 import { useQuery } from "@tanstack/react-query";
 
+export const useGroupstandingByGroup = (groupId: number) => {
+  const allGroupStandingByGroup = useQuery({
+    queryKey: ["groupId", groupId],
+    queryFn: () => getByGroupStanding(groupId),
+    // staleTime: 1000 * 60 * 60 * 24 //24horas
+  });
 
-export const useGroupstandingByGroup = (groupId:number) => {
-    const allGroupStandingByGroup = useQuery({
-        queryKey: ['groupId',groupId],
-        queryFn: () => getByGroupStanding(groupId),
-        staleTime: 1000 * 60 * 60 * 24 //24horas
-    })
-
-    return {
-        allGroupStandingByGroup
-    }
-}
+  return {
+    allGroupStandingByGroup,
+  };
+};
 
 // export const useMatchsByDate = (matchDateStart: Date, matchDateEnd:Date) => {
 
 //     const formatDateStart = moment(matchDateStart).format('YYYY-MM-DD 00:00:00');
 //     const formatDateEnd = moment(matchDateEnd).format('YYYY-MM-DD 24:00:00');
-
 
 //     const matchsByDateQuery = useQuery({
 //         queryKey: ['matchByDate'],
@@ -27,7 +25,6 @@ export const useGroupstandingByGroup = (groupId:number) => {
 //     })
 
 //     // console.log(matchsByDateQuery);
-
 
 //     return {
 //         matchsByDateQuery
@@ -44,7 +41,6 @@ export const useGroupstandingByGroup = (groupId:number) => {
 
 //     // console.log(matchsByIdQuery);
 
-
 //     return {matchsByIdQuery}
-        
+
 // }

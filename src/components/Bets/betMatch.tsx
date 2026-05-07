@@ -56,10 +56,10 @@ export default function MatchModal({
 
   const { toBet, updateBet } = useBet();
 
-  function formatDate(iso: string | number | Date) {
-    const d = new Date(iso);
-    return d.toLocaleString();
-  }
+  // function formatDate(iso: string | number | Date) {
+  //   const d = new Date(iso);
+  //   return d.toLocaleString();
+  // }
   // const [modalVisible, setModalVisible] = useState(visible);
   const match_date = new Date(matchId.match_date);
   const date_now = new Date();

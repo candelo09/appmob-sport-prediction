@@ -47,3 +47,30 @@ export const getMatchesById = async (matchId: number) => {
     console.error(error);
   }
 };
+
+export const saveMatch = async (match: Match) => {
+  try {
+    const { data } = await sportPredictionApi.post<Match>("matchs", match);
+
+    const dataMatch: Match = data;
+
+    return dataMatch;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const updateMatch = async (id: number, match: Match) => {
+  try {
+    const { data } = await sportPredictionApi.patch<Match>(
+      `matchs/${id}`,
+      match,
+    );
+
+    const dataMatch: Match = data;
+
+    return dataMatch;
+  } catch (error) {
+    console.error(error);
+  }
+};

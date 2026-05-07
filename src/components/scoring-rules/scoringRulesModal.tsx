@@ -36,7 +36,7 @@ export default function ScoringRulesModal({
             <>
               {scoringRules.map((item, index) => (
                 <>
-                  <View style={styles.cardRules}>
+                  <View key={item.id || index} style={styles.cardRules}>
                     <Text style={{ color: "#fff" }}>
                       Siglas: {item.abbreviation}
                     </Text>

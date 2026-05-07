@@ -11,6 +11,7 @@ import UserScreen from "../user/user";
 
 import { TableRankingBets } from "@/src/components/rankingBets/tableRankingBets";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import HomeScreen from "../Home/home";
 // export const unstable_settings = {
 //   anchor: '(tabs)',
 // };
@@ -25,8 +26,8 @@ export default function RootLayout() {
       {isAuthenticated ? (
         <Tab.Navigator>
           <Tab.Screen
-            name="Principal"
-            component={DrawerNavigation}
+            name="Inicio"
+            component={HomeScreen}
             options={{
               headerShown: false,
               tabBarIcon: ({ color }) => (
@@ -35,9 +36,10 @@ export default function RootLayout() {
             }}
           />
           <Tab.Screen
-            name="Ranking Participantes"
+            name="Ranking"
             component={TableRankingBets}
             options={{
+              headerShown: false,
               tabBarIcon: ({ color }) => (
                 <FontAwesome6 name="ranking-star" size={24} color="black" />
               ),
@@ -49,6 +51,7 @@ export default function RootLayout() {
             name="Usuario"
             component={UserScreen}
             options={{
+              headerShown: false,
               tabBarIcon: ({ color }) => (
                 <Entypo size={28} name="user" color="black" />
               ),
@@ -66,7 +69,7 @@ export default function RootLayout() {
       ) : (
         <Tab.Navigator>
           <Tab.Screen
-            name="Principal"
+            name="Inicio"
             component={DrawerNavigation}
             options={{
               headerShown: false,
@@ -76,9 +79,10 @@ export default function RootLayout() {
             }}
           />
           <Tab.Screen
-            name="Ranking Participantes"
+            name="Ranking"
             component={TableRankingBets}
             options={{
+              headerShown: false,
               tabBarIcon: ({ color }) => (
                 <FontAwesome6 name="ranking-star" size={24} color="black" />
               ),

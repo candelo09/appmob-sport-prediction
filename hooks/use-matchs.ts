@@ -1,7 +1,10 @@
+import { Match } from "@/src/interfaces/matchs";
 import {
-    getAllMatches,
-    getMatchesByDate,
-    getMatchesById,
+  getAllMatches,
+  getMatchesByDate,
+  getMatchesById,
+  saveMatch,
+  updateMatch,
 } from "@/src/services/matches-service";
 import { useQuery } from "@tanstack/react-query";
 
@@ -47,3 +50,15 @@ export const useMatchsById = (matchId: number) => {
 
   return { matchsByIdQuery };
 };
+
+export default function useMatch() {
+  function toCreateMatch(bodyMatch: Match) {
+    saveMatch(bodyMatch);
+  }
+
+  function toUpdateMatch(bodyMatch: Match) {
+    updateMatch(bodyMatch.id || 0, bodyMatch);
+  }
+
+  return { toCreateMatch, toUpdateMatch };
+}

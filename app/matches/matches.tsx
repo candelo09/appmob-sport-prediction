@@ -1,0 +1,317 @@
+import useMatch, { useMatchs } from "@/hooks/use-matchs";
+import MatchModalG from "@/src/components/match/MatchModalG";
+
+import { Match } from "@/src/interfaces/matchs";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Image,
+  ListRenderItem,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { FlatList } from "react-native-gesture-handler";
+
+// import MenuListLoggedInUser from '../../src/components/menuListHomeLogin/menuListLoggedInUser';
+// import Menu from '@/src/components/menuListHomeLogin/menuListLoggedInUser';
+
+// HomeScreen: lista de partidos (ejemplo: mundial) + botón para ir a Login
+export default function MatchScreen() {
+  const [showModalCreateParticipant, setShowModalCreateParticipant] =
+    useState(false);
+  const [allMatch, setAllMatch] = useState<Match>({} as Match);
+  const [selectedMatch, setSelectedMatch] = useState(false);
+  // const [flagModalAccountUpdate, setFlagModalAccountUpdate] = useState(false);
+  const { toCreateMatch, toUpdateMatch } = useMatch();
+  const { allMatchsQuery } = useMatchs();
+
+  useEffect(() => {
+    allMatchsQuery.refetch();
+  });
+
+  function formatDate(iso: string | number | Date) {
+    const d = new Date(iso);
+    return d.toLocaleString();
+  }
+
+  // console.log(findallParticipant);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    // Aquí llamarías tu API para recargar partidos
+    await new Promise((r) => setTimeout(r, 800));
+    setRefreshing(false);
+  }, []);
+
+  const filterByParticipant = allMatchsQuery.data?.filter((m) => {
+    const q = query.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      m.homeTeam.name.toLowerCase().includes(q) ||
+      m.awayTeam.name.toLowerCase().includes(q) ||
+      m.stadium.toLowerCase().includes(q) ||
+      m.stage.includes(q) ||
+      m.group.letter.includes(q) ||
+      m.home_score
+    );
+  });
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "En Juego":
+        return "#28a745"; // verde
+      case "Finalizado":
+        return "#dc3545"; // rojo
+      case "Por Jugar":
+        return "#ffc107"; // amarillo
+      default:
+        return "#ffffff";
+    }
+  };
+
+  const renderItem: ListRenderItem<Match> = ({ item }) => {
+    const color = getStatusColor(item.stage);
+    return (
+      <Pressable
+        style={styles.card}
+        onPress={() => {
+          // setFlagModalAccountUpdate(true);
+          setAllMatch(item);
+          setShowModalCreateParticipant(true);
+          setSelectedMatch(true);
+        }}
+      >
+        <View style={styles.metaRow}>
+          <Text style={styles.date}>{formatDate(item.match_date)}</Text>
+          <Text style={styles.group}>Grupo {item.group?.letter || ""}</Text>
+        </View>
+        <View style={styles.teamsRow}>
+          <View style={styles.team}>
+            <Image
+              source={{ uri: item.homeTeam!.flag }}
+              resizeMode="cover"
+              style={styles.flag}
+            />
+            <Text style={styles.teamName}>{item.homeTeam!.name}</Text>
+            {item.stage === "Finalizado" ? (
+              <>
+                <Text style={{ color: "white", fontWeight: "bold", left: 7 }}>
+                  {item.home_score}
+                </Text>
+              </>
+            ) : (
+              <></>
+            )}
+          </View>
+
+          <Text style={styles.vs}>vs</Text>
+
+          <View style={styles.teamRight}>
+            {item.stage === "Finalizado" ? (
+              <>
+                <Text style={{ color: "white", fontWeight: "bold", left: 7 }}>
+                  {item.away_score}
+                </Text>
+              </>
+            ) : (
+              <></>
+            )}
+            <Text style={styles.teamName}>{item.awayTeam.name}</Text>
+            <Image
+              source={{ uri: item.awayTeam.flag }}
+              resizeMode="cover"
+              style={styles.flag}
+            />
+          </View>
+        </View>
+
+        <View style={styles.metaRow}>
+          <Text style={styles.stadium}>Estadio {item.stadium}</Text>
+          <Text style={{ color, fontWeight: "bold" }}>{item.stage}</Text>
+        </View>
+      </Pressable>
+    );
+  };
+
+  // const renderItem: ListRenderItem<Match> = ({ item }) => (
+  //   <Pressable
+  //     style={styles.card}
+  //     onPress={() => {
+  //       setFlagModalAccountUpdate(true);
+  //       setShowModalCreateParticipant(true);
+  //       setDataParticipant(item);
+  //     }}
+  //   >
+  //     <View style={styles.metaRow}>
+  //       <Text style={styles.date}>{formatDate(item.match_date)}</Text>
+  //       <Text style={styles.group}>Grupo {item.group?.letter || ""}</Text>
+  //     </View>
+  //     <View style={styles.teamsRow}>
+  //       <View style={styles.team}>
+  //         <Image
+  //           source={{ uri: item.homeTeam!.flag }}
+  //           resizeMode="cover"
+  //           style={styles.flag}
+  //         />
+  //         <Text style={styles.teamName}>{item.homeTeam!.name}</Text>
+  //       </View>
+
+  //       <Text style={styles.vs}>vs</Text>
+
+  //       <View style={styles.teamRight}>
+  //         <Text style={styles.teamName}>{item.awayTeam.name}</Text>
+  //         <Image
+  //           source={{ uri: item.awayTeam.flag }}
+  //           resizeMode="cover"
+  //           style={styles.flag}
+  //         />
+  //       </View>
+  //     </View>
+
+  //     <View style={styles.metaRow}>
+  //       <Text style={styles.stadium}>Estadio {item.stadium}</Text>
+  //       <Text style={{ color, fontWeight: "bold" }}>{item.stage}</Text>
+  //     </View>
+  //   </Pressable>
+  // );
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Partidos</Text>
+
+      {/* LISTA */}
+
+      <FlatList
+        data={filterByParticipant}
+        keyExtractor={(item, index) =>
+          item.id ? item.id.toString() : index.toString()
+        }
+        renderItem={renderItem}
+        contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListEmptyComponent={() => (
+          <View style={styles.empty}>
+            <Text style={styles.emptyText}>
+              No hay participantes para mostrar
+            </Text>
+          </View>
+        )}
+      />
+
+      {/* BOTÓN CREAR */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => {
+          setShowModalCreateParticipant(true);
+          // setAllMatch();
+          setSelectedMatch(false);
+          // setFlagModalAccountUpdate(false);
+        }}
+      >
+        <Text style={styles.fabText}>＋</Text>
+      </TouchableOpacity>
+
+      {showModalCreateParticipant ? (
+        <MatchModalG
+          visible={showModalCreateParticipant}
+          match={allMatch}
+          title={selectedMatch ? "Editar Partido" : "Crear Partido"}
+          buttonText={selectedMatch ? "Actualizar" : "Crear"}
+          onClose={() => setShowModalCreateParticipant(false)}
+          onSave={(data) => {
+            if (data.id) {
+              toUpdateMatch(data);
+            } else {
+              toCreateMatch(data);
+            }
+          }}
+        ></MatchModalG>
+      ) : (
+        <></>
+      )}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#071226",
+    overflowX: "scroll",
+    overscrollBehaviorY: "none",
+  },
+
+  title: {
+    color: "#fff",
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 15,
+  },
+
+  card: {
+    backgroundColor: "#464f57ff",
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.03)",
+  },
+
+  name: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+
+  sub: {
+    color: "#aaa",
+    fontSize: 13,
+  },
+
+  fab: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#4e6cff",
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  fabText: {
+    color: "#fff",
+    fontSize: 28,
+  },
+
+  teamsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  team: { flexDirection: "row", alignItems: "center", gap: 8 },
+  teamRight: { flexDirection: "row", alignItems: "center", gap: 8 },
+  flag: { width: 42, height: 28, borderRadius: 4 },
+  teamName: { color: "#e6f2ff", fontWeight: "700", marginHorizontal: 8 },
+  vs: { color: "#9fb8d6", fontWeight: "700" },
+
+  metaRow: {
+    marginTop: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  date: { color: "#9fb8d6", bottom: 10 },
+  stadium: { color: "#9fb8d6" },
+  group: { color: "#9fb8d6", bottom: 10 },
+
+  empty: { padding: 40, alignItems: "center" },
+  emptyText: { color: "#9fb8d6" },
+});

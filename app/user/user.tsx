@@ -1,129 +1,122 @@
-import { useAuthContext } from '@/src/context/AuthContext';
-import React from 'react';
-import {
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
-} from 'react-native';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useAuthContext } from "@/src/context/AuthContext";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 // import MenuListLoggedInUser from '../../src/components/menuListHomeLogin/menuListLoggedInUser';
 // import Menu from '@/src/components/menuListHomeLogin/menuListLoggedInUser';
 
-
 // HomeScreen: lista de partidos (ejemplo: mundial) + botón para ir a Login
 export default function UserScreen() {
+  const { logout, user } = useAuthContext();
 
-    const { logout, user } = useAuthContext();
+  // console.log(`user`, user?.email);
 
-    // console.log(`user`, user?.email);
+  return (
+    <SafeAreaProvider style={{ backgroundColor: "#071226" }}>
+      <View style={styles.container}>
+        <View style={styles.card}>
+          {/* AVATAR */}
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>
+              {user?.firstname?.charAt(0) || "U"}
+            </Text>
+          </View>
 
-    return (
+          <Text style={styles.title}>Mi Cuenta</Text>
 
-        <SafeAreaProvider style={{ backgroundColor: "#071226" }}>
+          <View style={styles.infoContainer}>
+            <Text style={styles.label}>Nombre</Text>
+            <Text style={styles.value}>
+              {user?.firstname} {user?.surname}
+            </Text>
 
+            <Text style={styles.label}>Email</Text>
+            <Text style={styles.value}>{user?.email}</Text>
 
-            <View style={styles.container}>
+            <Text style={styles.label}>Teléfono</Text>
+            <Text style={styles.value}>{user?.phone}</Text>
+          </View>
+        </View>
 
-
-                <View style={styles.card}>
-                    <Text style={styles.title}>Cuenta</Text>
-
-                    <Text style={styles.content}>Nombre: {user?.firstname} {user?.surname} </Text>
-                    <Text style={styles.content}>Email: {user?.email}</Text>
-                    <Text style={styles.content}>Telefono: {user?.phone}</Text>
-
-                </View>
-
-                <View>
-                    <TouchableOpacity style={styles.newAccountBtn} onPress={() => {
-                        logout();
-
-                    }} >
-                        <Text style={{ color: 'white' }}>Cerrar Sesion</Text>
-                    </TouchableOpacity>
-                </View>
-
-
-
-            </View>
-        </SafeAreaProvider>
-
-
-
-    );
+        {/* BOTÓN */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+          <Text style={styles.logoutText}>Cerrar Sesión</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaProvider>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#071226',
-        // alignItems: 'center',
-        // justifyContent: 'center',
-        padding: 50,
-        top: 50,
-        // marginTop: '30%',
-        // position: 'relative'
-    },
-    header: {
-        height: 100,
-        // paddingHorizontal: 16,
-        padding: 16,
-        // flexDirection: 'row',
-        // alignItems: 'center',
-        // justifyContent: 'space-between',
-        // borderBottomWidth: 1,
-        borderBottomColor: 'rgba(99, 90, 90, 0.03)',
-        backgroundColor: '#474a50ff',
-    },
-    title: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 8,
-    },
-    content: {
-        fontSize: 14,
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#071226",
+    padding: 20,
+    justifyContent: "center",
+  },
 
-    loginBtn: {
-        paddingVertical: 6,
-        paddingHorizontal: 6,
-        borderRadius: 8,
-        backgroundColor: '#00a3ff',
-    },
-    newAccountBtn: {
-        // paddingVertical: 9,
-        // paddingHorizontal: 6,
-        margin:10,
-        padding:15,
-        borderRadius: 8,
-        backgroundColor: '#ad4755ff',
-    },
-    loginText: { color: '#ffffffff', fontWeight: '700' },
+  card: {
+    backgroundColor: "#0f1c3a",
+    borderRadius: 20,
+    padding: 25,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
+  },
 
-    searchBox: { padding: 12, backgroundColor: '#071226' },
-    searchInput: {
-        backgroundColor: '#7b97b3ff',
-        color: '#e6f2ff',
-        borderRadius: 10,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-    },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#4e6cff",
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 15,
+  },
 
-    card: {
-        backgroundColor: '#fff',
-        borderRadius: 8,
-        padding: 16,
-        margin: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3, // For Android shadow
-    },
+  avatarText: {
+    color: "#fff",
+    fontSize: 30,
+    fontWeight: "bold",
+  },
 
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#fff",
+    marginBottom: 20,
+  },
+
+  infoContainer: {
+    width: "100%",
+  },
+
+  label: {
+    color: "#aaa",
+    fontSize: 12,
+    marginTop: 10,
+  },
+
+  value: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "500",
+  },
+
+  logoutBtn: {
+    marginTop: 20,
+    backgroundColor: "#ff4d4d",
+    padding: 15,
+    borderRadius: 15,
+    alignItems: "center",
+  },
+
+  logoutText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
 });
-
-
-

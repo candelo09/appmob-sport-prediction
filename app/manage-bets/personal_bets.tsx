@@ -156,7 +156,7 @@ export default function PersonalBetsScreen() {
 
         <View style={styles.metaRow}>
           <Text style={styles.date}>{formatDate(item.matchId.match_date)}</Text>
-          <Text style={styles.stadium}>Estadio {item.matchId.stadium}</Text>
+          {/* <Text style={styles.stadium}>Estadio {item.matchId.stadium}</Text> */}
           <Text style={styles.stadium}>Grupo {item.matchId.group.letter}</Text>
           {/* <Text style={styles.stage}>{item.matchId.stage}</Text> */}
         </View>

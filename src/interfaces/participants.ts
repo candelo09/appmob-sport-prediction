@@ -5,6 +5,7 @@ export interface Participant {
   surname: string;
   email: string;
   phone: string;
+  perfil: string;
   password: string;
   created_at: Date | undefined;
 }
@@ -19,4 +20,7 @@ export interface Login {
   firstname: string;
   surname: string;
   email: string;
+  perfil: string;
+  phone: string;
+  created_at: Date;
 }

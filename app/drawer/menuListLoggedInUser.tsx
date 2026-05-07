@@ -1,17 +1,23 @@
-import HomeScreen from "@/app/Home/home";
 import BetsScreen from "@/app/manage-bets/bets";
 import { useAuthContext } from "@/src/context/AuthContext";
 
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import React from "react";
+import ParticipantScreen from "../(register-user)/participant";
+import TabLayout from "../(tabs)/tabs";
+import CControlScreen from "../ccontrol/ccontrol";
+import LoginScreen from "../login/login";
 import PersonalBetsScreen from "../manage-bets/personal_bets";
 import StandingsTableScreen from "../manage-standings/StandingsTable";
+import MatchScreen from "../matches/matches";
 import ResultScreen from "../results/results";
+import UserScreen from "../user/user";
 
 const Drawer = createDrawerNavigator();
 
 export default function DrawerNavigation() {
   const { isAuthenticated, user } = useAuthContext();
+  // console.log("user ", user);
 
   return (
     <>
@@ -24,7 +30,7 @@ export default function DrawerNavigation() {
             headerTintColor: "white",
           }}
         >
-          <Drawer.Screen name="Inicio" component={HomeScreen} />
+          <Drawer.Screen name="MainTabs" component={TabLayout} />
           {/* <Drawer.Screen name="Perfil" component={UserScreen} /> */}
           <Drawer.Screen
             name="Gestionar apuestas"
@@ -48,6 +54,35 @@ export default function DrawerNavigation() {
             component={ResultScreen}
             options={{ headerTitle: "Resultados" }}
           />
+          <Drawer.Screen
+            name="User"
+            component={UserScreen}
+            options={{ drawerItemStyle: { display: "none" } }}
+          />
+          <Drawer.Screen
+            name="Login"
+            component={LoginScreen}
+            options={{ drawerItemStyle: { display: "none" } }}
+          />
+          {user?.perfil === "ADM" && (
+            <>
+              <Drawer.Screen
+                name="Participant"
+                component={ParticipantScreen}
+                options={{ drawerItemStyle: { display: "none" } }}
+              />
+              <Drawer.Screen
+                name="Matches"
+                component={MatchScreen}
+                options={{ drawerItemStyle: { display: "none" } }}
+              />
+              <Drawer.Screen
+                name="Centro Control"
+                component={CControlScreen}
+                options={{ headerTitle: "Centro Control" }}
+              />
+            </>
+          )}
         </Drawer.Navigator>
       ) : (
         <Drawer.Navigator
@@ -58,7 +93,7 @@ export default function DrawerNavigation() {
             headerTintColor: "white",
           }}
         >
-          <Drawer.Screen name="Inicio" component={HomeScreen} />
+          <Drawer.Screen name="MainTabs" component={TabLayout} />
           <Drawer.Screen
             name="Tabla de Posiciones"
             component={StandingsTableScreen}

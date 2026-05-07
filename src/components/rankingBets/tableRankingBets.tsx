@@ -1,5 +1,5 @@
 import { useRankgins } from "@/hooks/use-rankings";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RefreshControl, ScrollView, StyleSheet } from "react-native";
 import { DataTable } from "react-native-paper";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -7,7 +7,11 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 export function TableRankingBets() {
   const { allRankingsQuery } = useRankgins();
 
-  console.log(allRankingsQuery.data);
+  useEffect(() => {
+    allRankingsQuery.refetch();
+  });
+
+  // console.log(allRankingsQuery.data);
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

@@ -7,7 +7,7 @@ export const useGroups = () => {
     const allGroupsQuery = useQuery({
         queryKey: ['allGroups'],
         queryFn: getAllGroup,
-        staleTime: 1000 * 60 * 60 * 24 //24horas
+        // staleTime: 1000 * 60 * 60 * 24 //24horas
     })
 
     return {

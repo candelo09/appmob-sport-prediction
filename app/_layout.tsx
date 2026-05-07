@@ -1,13 +1,9 @@
-import { AuthProvider } from '@/src/context/AuthContext';
+import { AuthProvider } from "@/src/context/AuthContext";
 
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import RootLayout from './(tabs)/_layout';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import {
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query';
-
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import DrawerNavigation from "./drawer/menuListLoggedInUser";
 
 // export const LoginContext = createContext<LoginContextType | undefined>(undefined);;
 
@@ -15,16 +11,14 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export type RootStackParamList = {
   App: { userId: string };
-  Tabs: undefined
+  HomeRoot: undefined;
   //   Account: { userId: string } | undefined; // puedes poner params si los necesitas
 };
 
 // Create a client
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 export default function AppNavigator() {
-
-
   // function MainTabs() {
   //   return (
   //     <Tab.Navigator>
@@ -34,18 +28,18 @@ export default function AppNavigator() {
   //   );
   // }
 
-
-
-
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <Stack.Navigator>
-          <Stack.Screen name="Tabs" component={RootLayout} options={{ headerShown: false }} />
+          <Stack.Screen
+            name="HomeRoot"
+            component={DrawerNavigation}
+            options={{ headerShown: false }}
+          />
           {/* <Stack.Screen name="App" component={AppScreen} options={{ headerShown: false }} /> */}
         </Stack.Navigator>
       </AuthProvider>
     </QueryClientProvider>
-
   );
 }

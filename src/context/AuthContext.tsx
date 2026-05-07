@@ -92,13 +92,14 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
 
       if (data !== undefined) {
         setUser({
-          // created_at: data.created_at,
+          created_at: user?.created_at,
           email: user?.email,
           firstname: user?.firstname,
           fullname: user?.fullname,
           id: user?.id,
+          perfil: user?.perfil,
           // // password: data.password,
-          // // phone: data.phone,
+          phone: user?.phone,
           surname: user?.surname,
         });
         setStatus(AuthStatus.authenticated);
