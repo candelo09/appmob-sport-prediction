@@ -82,10 +82,14 @@ export default function HomeScreen() {
     );
   });
 
-  // function formatDate(iso: string | number | Date) {
-  //   const d = new Date(iso);
-  //   return d.toLocaleString();
-  // }
+  function formatDate(iso: string | number | Date) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString("es-CO", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -104,6 +108,9 @@ export default function HomeScreen() {
     const color = getStatusColor(item.stage);
     return (
       <Pressable style={styles.card} onPress={() => {}}>
+        <View style={styles.metaRow}>
+          <Text style={styles.date}>Hora: {formatDate(item.match_date)}</Text>
+        </View>
         <View style={styles.teamsRow}>
           <View style={styles.team}>
             <Image
@@ -129,7 +136,6 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.metaRow}>
-          {/* <Text style={styles.date}>{formatDate(item.match_date)}</Text> */}
           <Text style={styles.stadium}>Grupo {item.group?.letter || ""}</Text>
           <Text style={styles.stadium}>Estadio {item.stadium}</Text>
           <Text style={{ color, fontWeight: "bold" }}>{item.stage}</Text>
@@ -299,7 +305,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  date: { color: "#9fb8d6" },
+  date: { color: "#9fb8d6", bottom: 10 },
   stadium: { color: "#ffffff" },
 
   empty: { padding: 40, alignItems: "center" },
