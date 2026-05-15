@@ -79,10 +79,13 @@ export default function MatchModal({
   }
 
   const handleSubmit = (values: any) => {
-    // const group: Group = {
-    //   id: 1,
-    //   letter: "",
-    // };
+    const hasScores =
+      values.homeScore !== "" &&
+      values.homeScore !== null &&
+      values.homeScore !== undefined &&
+      values.awayScore !== "" &&
+      values.awayScore !== null &&
+      values.awayScore !== undefined;
 
     const body: Match = {
       id: match?.id,
@@ -90,13 +93,11 @@ export default function MatchModal({
       awayTeam: values.awayTeam,
       match_date: new Date(values.date),
       stadium: values.stadium,
-      home_score: values.homeScore || 0,
-      away_score: values.awayScore || 0,
-      stage: "Por Jugar",
+      home_score: hasScores ? values.homeScore : null,
+      away_score: hasScores ? values.awayScore : null,
+      stage: hasScores ? "Finalizado" : "Por Jugar",
       group: values.group,
     };
-
-    // console.log("Group ", match.homeTeam.group.id);
 
     onSave(body);
     setShowAlert(true);
