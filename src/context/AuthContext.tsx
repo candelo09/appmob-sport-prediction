@@ -86,11 +86,10 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     try {
       const data: Token = (await login(authLogin)) || { access_token: "" };
 
-      const user = readToken(data.access_token);
+      console.log("data ", data);
 
-      // console.log('data ', data);
-
-      if (data !== undefined) {
+      if (data.access_token !== "") {
+        const user = readToken(data.access_token);
         setUser({
           created_at: user?.created_at,
           email: user?.email,

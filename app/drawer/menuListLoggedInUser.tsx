@@ -30,7 +30,7 @@ export default function DrawerNavigation() {
             headerTintColor: "white",
           }}
         >
-          <Drawer.Screen name="MainTabs" component={TabLayout} />
+          <Drawer.Screen name="Principal" component={TabLayout} />
           {/* <Drawer.Screen name="Perfil" component={UserScreen} /> */}
           <Drawer.Screen
             name="Gestionar apuestas"
@@ -93,7 +93,7 @@ export default function DrawerNavigation() {
             headerTintColor: "white",
           }}
         >
-          <Drawer.Screen name="MainTabs" component={TabLayout} />
+          <Drawer.Screen name="Principal" component={TabLayout} />
           <Drawer.Screen
             name="Tabla de Posiciones"
             component={StandingsTableScreen}

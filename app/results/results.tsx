@@ -48,8 +48,8 @@ export default function ResultScreen() {
       m.homeTeam.name.toLowerCase().includes(q) ||
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
-      m.stage.includes(q) ||
-      m.group.letter.includes(q) ||
+      m.stage.toLowerCase().includes(q) ||
+      m.group.letter.toLowerCase().includes(q) ||
       m.home_score
     );
   });
@@ -61,8 +61,8 @@ export default function ResultScreen() {
       m.homeTeam.name.toLowerCase().includes(q) ||
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
-      m.stage.includes(q) ||
-      m.group.letter.includes(q) ||
+      m.stage.toLowerCase().includes(q) ||
+      m.group.letter.toLowerCase().includes(q) ||
       m.away_score
     );
   });
@@ -170,7 +170,7 @@ export default function ResultScreen() {
       <SafeAreaView>
         <View style={styles.searchBox}>
           <TextInput
-            placeholder="Buscar equipo o estadio"
+            placeholder="Buscar"
             value={query}
             onChangeText={setQuery}
             style={styles.searchInput}
@@ -204,7 +204,7 @@ export default function ResultScreen() {
           <>
             <FlatList
               data={filteredbyToday}
-              // keyExtractor={({ item }: any) => item.id}
+              keyExtractor={(item: Match) => item.id.toString()}
               renderItem={renderItem}
               contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
               refreshControl={
@@ -223,7 +223,7 @@ export default function ResultScreen() {
           <>
             <FlatList
               data={filtered}
-              // keyExtractor={({ item }: any) => item.id}
+              keyExtractor={(item: Match) => item.id.toString()}
               renderItem={renderItem}
               contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
               refreshControl={

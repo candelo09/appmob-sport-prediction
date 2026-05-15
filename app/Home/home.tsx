@@ -77,6 +77,7 @@ export default function HomeScreen() {
     return (
       m.homeTeam.name.toLowerCase().includes(q) ||
       m.awayTeam.name.toLowerCase().includes(q) ||
+      m.stage.toLocaleLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q)
     );
   });
@@ -138,35 +139,31 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaProvider style={styles.container}>
-      <SafeAreaView>
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container}>
         {isAuthenticated ? (
-          <>
-            <View
-              style={{
-                marginBottom: 7,
-                marginTop: 5,
-                position: "relative",
-                flexDirection: "row",
-              }}
-            >
-              <View style={styles.headerLogLogin}>
-                <Text style={styles.titleLogLogin}>
-                  {user?.firstname[0]}
-                  {user?.surname[0]}
-                </Text>
-              </View>
-              <View style={styles.headerLogin}>
-                <Text style={styles.nameTitle}>Bienvenid@</Text>
-                <Text style={styles.nameTitle}>
-                  {user?.firstname} {user?.surname}
-                </Text>
-              </View>
+          <View
+            style={{
+              marginBottom: 7,
+              marginTop: 5,
+              flexDirection: "row",
+            }}
+          >
+            <View style={styles.headerLogLogin}>
+              <Text style={styles.titleLogLogin}>
+                {user?.firstname[0]}
+                {user?.surname[0]}
+              </Text>
             </View>
-          </>
-        ) : (
-          <></>
-        )}
+
+            <View style={styles.headerLogin}>
+              <Text style={styles.nameTitle}>Bienvenid@</Text>
+              <Text style={styles.nameTitle}>
+                {user?.firstname} {user?.surname}
+              </Text>
+            </View>
+          </View>
+        ) : null}
 
         <View style={styles.searchBox}>
           <TextInput
@@ -189,50 +186,36 @@ export default function HomeScreen() {
           >
             PARTIDOS DEL DÍA
           </Text>
+
           <View style={styles.teamRight}>
             <Button
               style={{
                 backgroundColor: "rgb(231, 170, 71)",
-
                 height: 40,
-                // width: 50,
                 marginEnd: 15,
               }}
-              onPress={() => {
-                setShowModalScoringRules(true);
-              }}
+              onPress={() => setShowModalScoringRules(true)}
             >
               <Text
                 style={{
                   color: "#fff",
                   fontWeight: "bold",
                   fontSize: 10,
-                  // bottom: 10,
-                  marginBottom: 20,
                 }}
               >
                 Reglas
               </Text>
             </Button>
           </View>
-          {showModalScoringRules ? (
-            <>
-              <ScoringRulesModal
-                visible={showModalScoringRules}
-                onClose={() => setShowModalScoringRules(false)}
-                scoringRules={allScoringRules.data || []}
-              ></ScoringRulesModal>
-            </>
-          ) : (
-            <></>
-          )}
         </View>
 
         <FlatList
           data={filtered}
           keyExtractor={(item: Match) => item.id.toString()}
           renderItem={renderItem}
-          contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+          style={{ flex: 1 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          keyboardShouldPersistTaps="handled"
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -242,6 +225,14 @@ export default function HomeScreen() {
             </View>
           )}
         />
+
+        {showModalScoringRules && (
+          <ScoringRulesModal
+            visible={showModalScoringRules}
+            onClose={() => setShowModalScoringRules(false)}
+            scoringRules={allScoringRules.data || []}
+          />
+        )}
       </SafeAreaView>
     </SafeAreaProvider>
   );
