@@ -51,8 +51,8 @@ export default function BetsScreen() {
       m.homeTeam.name.toLowerCase().includes(q) ||
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
-      m.stage.includes(q) ||
-      m.group.letter.includes(q)
+      m.stage.toLowerCase().includes(q) ||
+      m.group.letter.toLowerCase().includes(q)
     );
   });
 
@@ -63,8 +63,8 @@ export default function BetsScreen() {
       m.homeTeam.name.toLowerCase().includes(q) ||
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
-      m.stage.includes(q) ||
-      m.group.letter.includes(q)
+      m.stage.toLowerCase().includes(q) ||
+      m.group.letter.toLowerCase().includes(q)
     );
   });
 

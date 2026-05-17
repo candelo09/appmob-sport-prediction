@@ -56,10 +56,29 @@ export default function PersonalBetsScreen() {
       return (
         m.matchId.homeTeam.name.toLowerCase().includes(q) ||
         m.matchId.awayTeam.name.toLowerCase().includes(q) ||
-        m.matchId.stadium.toLowerCase().includes(q)
+        m.matchId.stadium.toLowerCase().includes(q) ||
+        `grupo ${m.matchId.group.letter.toLowerCase()}`.includes(q)
       );
     },
   );
+
+  const groupedPredictions =
+    filtered?.reduce(
+      (acc, item) => {
+        const groupLetter = item.matchId.group?.letter || "Sin Grupo";
+
+        if (!acc[groupLetter]) {
+          acc[groupLetter] = [];
+        }
+
+        acc[groupLetter].push(item);
+
+        return acc;
+      },
+      {} as Record<string, Prediction[]>,
+    ) || {};
+
+  const groupedData = Object.entries(groupedPredictions);
 
   // const filteredbyToday =
   //   predictionByIdQuery.data?.predictionsByParticipant.filter((m) => {
@@ -120,9 +139,7 @@ export default function PersonalBetsScreen() {
 
   const [matchId, setMatchId] = useState({} as Match);
 
-  function renderItem({ item }: { item: Prediction }) {
-    // console.log("item ", item.matchId.group.letter);
-
+  function renderPrediction({ item }: { item: Prediction }) {
     return (
       <Pressable
         style={styles.card}
@@ -139,11 +156,17 @@ export default function PersonalBetsScreen() {
               style={styles.flag}
             />
             <Text style={styles.teamName}>{item.matchId.homeTeam!.name}</Text>
-            <Text style={{ color: "#ffff" }}>{item.predicted_home_score}</Text>
+            <Text style={{ color: "#ffff", fontWeight: "bold" }}>
+              {item.predicted_home_score}
+            </Text>
           </View>
 
           <Text style={styles.vs}>vs</Text>
-          <Text style={{ color: "#ffff" }}>{item.predicted_away_score}</Text>
+
+          <Text style={{ color: "#ffff", fontWeight: "bold" }}>
+            {item.predicted_away_score}
+          </Text>
+
           <View style={styles.teamRight}>
             <Text style={styles.teamName}>{item.matchId.awayTeam.name}</Text>
             <Image
@@ -156,11 +179,25 @@ export default function PersonalBetsScreen() {
 
         <View style={styles.metaRow}>
           <Text style={styles.date}>{formatDate(item.matchId.match_date)}</Text>
-          {/* <Text style={styles.stadium}>Estadio {item.matchId.stadium}</Text> */}
-          <Text style={styles.stadium}>Grupo {item.matchId.group.letter}</Text>
-          {/* <Text style={styles.stage}>{item.matchId.stage}</Text> */}
         </View>
       </Pressable>
+    );
+  }
+
+  function renderGroup({ item }: { item: [string, Prediction[]] }) {
+    const [groupLetter, predictions] = item;
+
+    return (
+      <View style={styles.groupContainer}>
+        <Text style={styles.groupTitle}>GRUPO {groupLetter}</Text>
+
+        <FlatList
+          data={predictions}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderPrediction}
+          scrollEnabled={false}
+        />
+      </View>
     );
   }
 
@@ -201,9 +238,9 @@ export default function PersonalBetsScreen() {
         )} */}
         <>
           <FlatList
-            data={filtered}
-            // keyExtractor={({ item }: any) => item.id}
-            renderItem={renderItem}
+            data={groupedData}
+            keyExtractor={(item) => item[0]}
+            renderItem={renderGroup}
             contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -378,5 +415,20 @@ const styles = StyleSheet.create({
     boxShadow: "none",
     fontSize: 15,
     transitionDelay: "0.4s",
+  },
+
+  groupContainer: {
+    marginBottom: 20,
+  },
+
+  groupTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    paddingHorizontal: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: "#4e6cff",
+    paddingLeft: 10,
   },
 });
