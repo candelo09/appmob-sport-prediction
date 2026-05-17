@@ -10,6 +10,7 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -30,7 +31,7 @@ export default function MatchScreen() {
 
   useEffect(() => {
     allMatchsQuery.refetch();
-  });
+  }, [allMatchsQuery]);
 
   function formatDate(iso: string | number | Date) {
     const d = new Date(iso);
@@ -51,16 +52,42 @@ export default function MatchScreen() {
 
   const filterByParticipant = allMatchsQuery.data?.filter((m) => {
     const q = query.toLowerCase().trim();
+
     if (!q) return true;
+
+    const homeScore = m.home_score?.toString() || "";
+    const awayScore = m.away_score?.toString() || "";
+    const groupText = `grupo ${m.group?.letter || ""}`.toLowerCase();
+
     return (
       m.homeTeam.name.toLowerCase().includes(q) ||
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
-      m.stage.includes(q) ||
-      m.group.letter.includes(q) ||
-      m.home_score
+      m.stage.toLowerCase().includes(q) ||
+      groupText.includes(q) ||
+      homeScore.includes(q) ||
+      awayScore.includes(q)
     );
   });
+
+  const groupedMatches =
+    filterByParticipant?.reduce(
+      (acc, item) => {
+        const groupLetter = item.group?.letter || "Sin Grupo";
+
+        if (!acc[groupLetter]) {
+          acc[groupLetter] = [];
+        }
+
+        acc[groupLetter].push(item);
+
+        return acc;
+      },
+      {} as Record<string, Match[]>,
+    ) || {};
+
+  const groupedData = Object.entries(groupedMatches);
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "En Juego":
@@ -138,6 +165,23 @@ export default function MatchScreen() {
     );
   };
 
+  function renderGroup({ item }: { item: [string, Match[]] }) {
+    const [groupLetter, matches] = item;
+
+    return (
+      <View style={styles.groupContainer}>
+        <Text style={styles.groupTitle}>GRUPO {groupLetter}</Text>
+
+        <FlatList
+          data={matches}
+          keyExtractor={(item: Match) => item.id.toString()}
+          renderItem={renderItem}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  }
+
   // const renderItem: ListRenderItem<Match> = ({ item }) => (
   //   <Pressable
   //     style={styles.card}
@@ -184,14 +228,21 @@ export default function MatchScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Partidos</Text>
 
+      <View style={styles.searchBox}>
+        <TextInput
+          placeholder="Buscar equipo o estadio"
+          value={query}
+          onChangeText={setQuery}
+          style={styles.searchInput}
+        />
+      </View>
+
       {/* LISTA */}
 
       <FlatList
-        data={filterByParticipant}
-        keyExtractor={(item, index) =>
-          item.id ? item.id.toString() : index.toString()
-        }
-        renderItem={renderItem}
+        data={groupedData}
+        keyExtractor={(item) => item[0]}
+        renderItem={renderGroup}
         contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -255,6 +306,15 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
 
+  searchBox: { padding: 12, backgroundColor: "#071226" },
+  searchInput: {
+    backgroundColor: "#7b97b3ff",
+    color: "#e6f2ff",
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+
   card: {
     backgroundColor: "#464f57ff",
     borderRadius: 12,
@@ -314,4 +374,19 @@ const styles = StyleSheet.create({
 
   empty: { padding: 40, alignItems: "center" },
   emptyText: { color: "#9fb8d6" },
+
+  groupContainer: {
+    marginBottom: 20,
+  },
+
+  groupTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    paddingHorizontal: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: "#4e6cff",
+    paddingLeft: 10,
+  },
 });

@@ -49,7 +49,7 @@ export default function ResultScreen() {
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
       m.stage.toLowerCase().includes(q) ||
-      m.group.letter.toLowerCase().includes(q) ||
+      `grupo ${m.group.letter.toLowerCase()}`.includes(q) ||
       m.home_score
     );
   });
@@ -62,10 +62,46 @@ export default function ResultScreen() {
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
       m.stage.toLowerCase().includes(q) ||
-      m.group.letter.toLowerCase().includes(q) ||
+      `grupo ${m.group.letter.toLowerCase()}`.includes(q) ||
       m.away_score
     );
   });
+
+  const groupedMatches =
+    filtered?.reduce(
+      (acc, item) => {
+        const groupLetter = item.group?.letter || "Sin Grupo";
+
+        if (!acc[groupLetter]) {
+          acc[groupLetter] = [];
+        }
+
+        acc[groupLetter].push(item);
+
+        return acc;
+      },
+      {} as Record<string, Match[]>,
+    ) || {};
+
+  const groupedData = Object.entries(groupedMatches);
+
+  const groupedMatchesByToday =
+    filteredbyToday?.reduce(
+      (acc, item) => {
+        const groupLetter = item.group?.letter || "Sin Grupo";
+
+        if (!acc[groupLetter]) {
+          acc[groupLetter] = [];
+        }
+
+        acc[groupLetter].push(item);
+
+        return acc;
+      },
+      {} as Record<string, Match[]>,
+    ) || {};
+
+  const groupedDataByToday = Object.entries(groupedMatchesByToday);
 
   // console.log(`filtered`, filtered);
 
@@ -165,6 +201,23 @@ export default function ResultScreen() {
     );
   }
 
+  function renderGroup({ item }: { item: [string, Match[]] }) {
+    const [groupLetter, matches] = item;
+
+    return (
+      <View style={styles.groupContainer}>
+        <Text style={styles.groupTitle}>GRUPO {groupLetter}</Text>
+
+        <FlatList
+          data={matches}
+          keyExtractor={(item: Match) => item.id.toString()}
+          renderItem={renderItem}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaProvider style={styles.container}>
       <SafeAreaView>
@@ -203,9 +256,9 @@ export default function ResultScreen() {
         {value === "0" ? (
           <>
             <FlatList
-              data={filteredbyToday}
-              keyExtractor={(item: Match) => item.id.toString()}
-              renderItem={renderItem}
+              data={groupedDataByToday}
+              keyExtractor={(item) => item[0]}
+              renderItem={renderGroup}
               contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -222,9 +275,9 @@ export default function ResultScreen() {
         ) : (
           <>
             <FlatList
-              data={filtered}
-              keyExtractor={(item: Match) => item.id.toString()}
-              renderItem={renderItem}
+              data={groupedData}
+              keyExtractor={(item) => item[0]}
+              renderItem={renderGroup}
               contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -400,5 +453,20 @@ const styles = StyleSheet.create({
     boxShadow: "none",
     fontSize: 15,
     transitionDelay: "0.4s",
+  },
+
+  groupContainer: {
+    marginBottom: 20,
+  },
+
+  groupTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 12,
+    paddingHorizontal: 4,
+    borderLeftWidth: 4,
+    borderLeftColor: "#4e6cff",
+    paddingLeft: 10,
   },
 });
