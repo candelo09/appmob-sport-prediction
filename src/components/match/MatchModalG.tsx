@@ -1,5 +1,5 @@
 import { useGroups } from "@/hooks/use-group";
-import { useAllTeams } from "@/hooks/use-teams";
+import { useAllTeams, useAllTeamsFinales } from "@/hooks/use-teams";
 import AlertModal from "@/src/components/alert-modal/alertModal";
 import { Match } from "@/src/interfaces/matchs";
 import { Picker } from "@react-native-picker/picker";
@@ -35,10 +35,44 @@ export default function MatchModal({
 }: Props) {
   const [showAlert, setShowAlert] = useState(false);
   const { findallTeam } = useAllTeams();
+  const { findallTeam: findallTeamFinales } = useAllTeamsFinales();
   const { allGroupsQuery } = useGroups();
+  const hasQualifiedTeams = (findallTeamFinales.data?.length || 0) > 0;
+  const teamsOptions = hasQualifiedTeams
+    ? findallTeamFinales.data?.map((qualifiedTeam) => qualifiedTeam.team) || []
+    : findallTeam.data || [];
+  const localTeamLabel = hasQualifiedTeams
+    ? "Equipo local clasificado"
+    : "Equipo local";
+  const awayTeamLabel = hasQualifiedTeams
+    ? "Equipo visitante clasificado"
+    : "Equipo visitante";
+  const finalPhases = [
+    "ROUND_32",
+    "ROUND_16",
+    "QUARTER",
+    "SEMI",
+    "THIRD_PLACE",
+    "FINAL",
+  ];
   const validationSchema = Yup.object({
     homeTeam: Yup.string().required("Equipo local requerido"),
-    awayTeam: Yup.string().required("Equipo visitante requerido"),
+    awayTeam: Yup.string()
+      .required("Equipo visitante requerido")
+      .test(
+        "different-teams",
+        "Local y visitante no pueden ser iguales",
+        (value, context) => {
+          return (
+            !value ||
+            !context.parent.homeTeam ||
+            value !== context.parent.homeTeam
+          );
+        },
+      ),
+    match_phase: hasQualifiedTeams
+      ? Yup.string().required("Fase requerida")
+      : Yup.string(),
     date: Yup.string().required("Fecha requerida"),
     stadium: Yup.string().required("Estadio requerido"),
   });
@@ -97,6 +131,7 @@ export default function MatchModal({
       away_score: hasScores ? values.awayScore : null,
       stage: hasScores ? "Finalizado" : "Por Jugar",
       group: values.group,
+      match_phase: values.match_phase,
     };
 
     onSave(body);
@@ -120,6 +155,7 @@ export default function MatchModal({
                 awayScore: match?.away_score?.toString() || "",
                 group:
                   match?.group !== undefined ? match?.group.id?.toString() : "",
+                match_phase: match?.match_phase || "",
               }}
               enableReinitialize
               validationSchema={validationSchema}
@@ -135,8 +171,8 @@ export default function MatchModal({
                     }}
                     style={styles.picker}
                   >
-                    <Picker.Item label="Seleccione equipo local" value="" />
-                    {findallTeam.data?.map((team) => (
+                    <Picker.Item label={localTeamLabel} value="" />
+                    {teamsOptions.map((team) => (
                       <Picker.Item
                         key={team.id}
                         label={team.name}
@@ -155,8 +191,8 @@ export default function MatchModal({
                     }}
                     style={styles.picker}
                   >
-                    <Picker.Item label="Seleccione equipo visitante" value="" />
-                    {findallTeam.data?.map((team) => (
+                    <Picker.Item label={awayTeamLabel} value="" />
+                    {teamsOptions.map((team) => (
                       <Picker.Item
                         key={team.id}
                         label={team.name}
@@ -164,6 +200,9 @@ export default function MatchModal({
                       ></Picker.Item>
                     ))}
                   </Picker>
+                  {touched.awayTeam && errors.awayTeam && (
+                    <Text style={styles.error}>{errors.awayTeam}</Text>
+                  )}
                   {/* Estadio */}
 
                   <TextInput
@@ -203,6 +242,30 @@ export default function MatchModal({
                   )}
 
                   {/* Marcadores (solo útil en update) */}
+                  {hasQualifiedTeams && (
+                    <>
+                      <Picker
+                        selectedValue={values.match_phase}
+                        onValueChange={(value) => {
+                          handleChange("match_phase")(value);
+                        }}
+                        style={styles.picker}
+                      >
+                        <Picker.Item label="Seleccione fase" value="" />
+                        {finalPhases.map((phase) => (
+                          <Picker.Item
+                            key={phase}
+                            label={phase}
+                            value={phase}
+                          />
+                        ))}
+                      </Picker>
+                      {touched.match_phase && errors.match_phase && (
+                        <Text style={styles.error}>{errors.match_phase}</Text>
+                      )}
+                    </>
+                  )}
+
                   <View style={styles.row}>
                     <TextInput
                       style={styles.score}

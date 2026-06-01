@@ -15,6 +15,23 @@ import {
 
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+const FINAL_PHASES = [
+  "ROUND_32",
+  "ROUND_16",
+  "QUARTER",
+  "SEMI",
+  "THIRD_PLACE",
+  "FINAL",
+] as const;
+
+const getMatchPhase = (matchPhase: string) => matchPhase.toUpperCase();
+
+type ResultSection = {
+  title: string;
+  data: [string, Match[]][];
+  isFinalPhase: boolean;
+};
+
 // import MenuListLoggedInUser from '../../src/components/menuListHomeLogin/menuListLoggedInUser';
 // import Menu from '@/src/components/menuListHomeLogin/menuListLoggedInUser';
 
@@ -49,7 +66,7 @@ export default function ResultScreen() {
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
       m.stage.toLowerCase().includes(q) ||
-      `grupo ${m.group.letter.toLowerCase()}`.includes(q) ||
+      `grupo ${m.group?.letter?.toLowerCase() || ""}`.includes(q) ||
       m.home_score
     );
   });
@@ -62,46 +79,148 @@ export default function ResultScreen() {
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
       m.stage.toLowerCase().includes(q) ||
-      `grupo ${m.group.letter.toLowerCase()}`.includes(q) ||
+      `grupo ${m.group?.letter?.toLowerCase() || ""}`.includes(q) ||
       m.away_score
     );
   });
 
+  const hasFinalMatches =
+    allMatchsQuery.data?.some(
+      (m) => getMatchPhase(m.match_phase) !== "GROUP",
+    ) || false;
+
   const groupedMatches =
-    filtered?.reduce(
-      (acc, item) => {
-        const groupLetter = item.group?.letter || "Sin Grupo";
+    filtered
+      ?.filter((item) => getMatchPhase(item.match_phase) === "GROUP")
+      .reduce(
+        (acc, item) => {
+          const groupLetter = item.group?.letter || "Sin Grupo";
 
-        if (!acc[groupLetter]) {
-          acc[groupLetter] = [];
-        }
+          if (!acc[groupLetter]) {
+            acc[groupLetter] = [];
+          }
 
-        acc[groupLetter].push(item);
+          acc[groupLetter].push(item);
 
-        return acc;
-      },
-      {} as Record<string, Match[]>,
-    ) || {};
+          return acc;
+        },
+        {} as Record<string, Match[]>,
+      ) || {};
+
+  const groupedFinalMatches =
+    filtered
+      ?.filter((item) => getMatchPhase(item.match_phase) !== "GROUP")
+      .reduce(
+        (acc, item) => {
+          const finalPhase = getMatchPhase(item.match_phase);
+
+          if (!acc[finalPhase]) {
+            acc[finalPhase] = [];
+          }
+
+          acc[finalPhase].push(item);
+
+          return acc;
+        },
+        {} as Record<string, Match[]>,
+      ) || {};
 
   const groupedData = Object.entries(groupedMatches);
 
+  const groupedFinalData = FINAL_PHASES.filter(
+    (phase) => groupedFinalMatches[phase],
+  ).map((phase) => [phase, groupedFinalMatches[phase]] as [string, Match[]]);
+
+  const resultSections: ResultSection[] = hasFinalMatches
+    ? [
+        {
+          title: "Fase de Grupos",
+          data: groupedData,
+          isFinalPhase: false,
+        },
+        {
+          title: "Fase Final",
+          data: groupedFinalData,
+          isFinalPhase: true,
+        },
+      ].filter((section) => section.data.length > 0)
+    : [
+        {
+          title: "",
+          data: groupedData,
+          isFinalPhase: false,
+        },
+      ];
+
+  const hasFinalMatchesByToday =
+    matchsByDateQuery.data?.some(
+      (m) => getMatchPhase(m.match_phase) !== "GROUP",
+    ) || false;
+
   const groupedMatchesByToday =
-    filteredbyToday?.reduce(
-      (acc, item) => {
-        const groupLetter = item.group?.letter || "Sin Grupo";
+    filteredbyToday
+      ?.filter((item) => getMatchPhase(item.match_phase) === "GROUP")
+      .reduce(
+        (acc, item) => {
+          const groupLetter = item.group?.letter || "Sin Grupo";
 
-        if (!acc[groupLetter]) {
-          acc[groupLetter] = [];
-        }
+          if (!acc[groupLetter]) {
+            acc[groupLetter] = [];
+          }
 
-        acc[groupLetter].push(item);
+          acc[groupLetter].push(item);
 
-        return acc;
-      },
-      {} as Record<string, Match[]>,
-    ) || {};
+          return acc;
+        },
+        {} as Record<string, Match[]>,
+      ) || {};
+
+  const groupedFinalMatchesByToday =
+    filteredbyToday
+      ?.filter((item) => getMatchPhase(item.match_phase) !== "GROUP")
+      .reduce(
+        (acc, item) => {
+          const finalPhase = getMatchPhase(item.match_phase);
+
+          if (!acc[finalPhase]) {
+            acc[finalPhase] = [];
+          }
+
+          acc[finalPhase].push(item);
+
+          return acc;
+        },
+        {} as Record<string, Match[]>,
+      ) || {};
 
   const groupedDataByToday = Object.entries(groupedMatchesByToday);
+
+  const groupedFinalDataByToday = FINAL_PHASES.filter(
+    (phase) => groupedFinalMatchesByToday[phase],
+  ).map(
+    (phase) => [phase, groupedFinalMatchesByToday[phase]] as [string, Match[]],
+  );
+
+  const resultSectionsByToday: ResultSection[] = hasFinalMatchesByToday
+    ? [
+        {
+          title: "Fase de Grupos",
+          data: groupedDataByToday,
+          isFinalPhase: false,
+        },
+        {
+          title: "Fase Final",
+          data: groupedFinalDataByToday,
+          isFinalPhase: true,
+        },
+      ].filter((section) => section.data.length > 0)
+    : [
+        {
+          title: "",
+          data: groupedDataByToday,
+          isFinalPhase: false,
+        },
+      ];
 
   // console.log(`filtered`, filtered);
 
@@ -167,7 +286,11 @@ export default function ResultScreen() {
       <SafeAreaView style={styles.card}>
         <View style={styles.metaRow}>
           <Text style={styles.date}>{formatDate(item.match_date)}</Text>
-          <Text style={styles.group}>Grupo {item.group?.letter || ""}</Text>
+          <Text style={styles.group}>
+            {getMatchPhase(item.match_phase) === "GROUP"
+              ? `Grupo ${item.group?.letter || ""}`
+              : `Fase ${getMatchPhase(item.match_phase)}`}
+          </Text>
         </View>
         <View style={styles.teamsRow}>
           <View style={styles.team}>
@@ -218,6 +341,38 @@ export default function ResultScreen() {
     );
   }
 
+  function renderFinalGroup({ item }: { item: [string, Match[]] }) {
+    const [finalPhase, matches] = item;
+
+    return (
+      <View style={styles.groupContainer}>
+        <Text style={styles.groupTitle}>{finalPhase}</Text>
+
+        <FlatList
+          data={matches}
+          keyExtractor={(item: Match) => item.id.toString()}
+          renderItem={renderItem}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  }
+
+  function renderSection({ item }: { item: ResultSection }) {
+    return (
+      <View>
+        {item.title ? <Text style={styles.groupTitle}>{item.title}</Text> : null}
+
+        <FlatList
+          data={item.data}
+          keyExtractor={(item) => item[0]}
+          renderItem={item.isFinalPhase ? renderFinalGroup : renderGroup}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaProvider style={styles.container}>
       <SafeAreaView>
@@ -256,9 +411,9 @@ export default function ResultScreen() {
         {value === "0" ? (
           <>
             <FlatList
-              data={groupedDataByToday}
-              keyExtractor={(item) => item[0]}
-              renderItem={renderGroup}
+              data={resultSectionsByToday}
+              keyExtractor={(item) => item.title || "Fase de Grupos"}
+              renderItem={renderSection}
               contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -275,9 +430,9 @@ export default function ResultScreen() {
         ) : (
           <>
             <FlatList
-              data={groupedData}
-              keyExtractor={(item) => item[0]}
-              renderItem={renderGroup}
+              data={resultSections}
+              keyExtractor={(item) => item.title || "Fase de Grupos"}
+              renderItem={renderSection}
               contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
               refreshControl={
                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

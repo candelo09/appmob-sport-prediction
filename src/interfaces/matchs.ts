@@ -23,6 +23,17 @@ export interface Match {
   awayTeam: Team;
   stadium: string;
   group: Group;
+  match_phase: string;
+}
+
+export interface MatchFinal {
+  id: number;
+  qualification_type: string;
+  group_position: number;
+  qualified_for_phase: string;
+  created_at: Date;
+  team: Team;
+  sourceGroup: Group;
 }
 
 export interface Team {

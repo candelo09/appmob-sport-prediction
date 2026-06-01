@@ -1,3 +1,4 @@
+import { MatchFinal } from "../interfaces/matchs";
 import { Teams } from "../interfaces/team";
 import { sportPredictionApi } from "./api/sport-prediction-api";
 
@@ -8,6 +9,20 @@ export const allTeams = async () => {
     const dataTeams: Teams[] = data;
 
     return dataTeams;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const allTeamsFinales = async () => {
+  try {
+    const { data } = await sportPredictionApi.get<MatchFinal[]>("finales");
+
+    const matchs = data;
+
+    // console.log(`matchs`, matchs);
+
+    return matchs;
   } catch (error) {
     console.error(error);
   }

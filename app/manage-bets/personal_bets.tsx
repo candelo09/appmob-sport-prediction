@@ -17,6 +17,23 @@ import {
 
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+const FINAL_PHASES = [
+  "ROUND_32",
+  "ROUND_16",
+  "QUARTER",
+  "SEMI",
+  "THIRD_PLACE",
+  "FINAL",
+] as const;
+
+const getMatchPhase = (matchPhase: string) => matchPhase.toUpperCase();
+
+type PredictionSection = {
+  title: string;
+  data: [string, Prediction[]][];
+  isFinalPhase: boolean;
+};
+
 // import MenuListLoggedInUser from '../../src/components/menuListHomeLogin/menuListLoggedInUser';
 // import Menu from '@/src/components/menuListHomeLogin/menuListLoggedInUser';
 
@@ -57,28 +74,83 @@ export default function PersonalBetsScreen() {
         m.matchId.homeTeam.name.toLowerCase().includes(q) ||
         m.matchId.awayTeam.name.toLowerCase().includes(q) ||
         m.matchId.stadium.toLowerCase().includes(q) ||
-        `grupo ${m.matchId.group.letter.toLowerCase()}`.includes(q)
+        `grupo ${m.matchId.group?.letter?.toLowerCase() || ""}`.includes(q)
       );
     },
   );
 
+  const hasFinalPredictions =
+    predictionByIdQuery.data?.predictionsByParticipant.some(
+      (m) => getMatchPhase(m.matchId.match_phase) !== "GROUP",
+    ) || false;
+
   const groupedPredictions =
-    filtered?.reduce(
-      (acc, item) => {
-        const groupLetter = item.matchId.group?.letter || "Sin Grupo";
+    filtered
+      ?.filter((item) => getMatchPhase(item.matchId.match_phase) === "GROUP")
+      .reduce(
+        (acc, item) => {
+          const groupLetter = item.matchId.group?.letter || "Sin Grupo";
 
-        if (!acc[groupLetter]) {
-          acc[groupLetter] = [];
-        }
+          if (!acc[groupLetter]) {
+            acc[groupLetter] = [];
+          }
 
-        acc[groupLetter].push(item);
+          acc[groupLetter].push(item);
 
-        return acc;
-      },
-      {} as Record<string, Prediction[]>,
-    ) || {};
+          return acc;
+        },
+        {} as Record<string, Prediction[]>,
+      ) || {};
+
+  const groupedFinalPredictions =
+    filtered
+      ?.filter((item) => getMatchPhase(item.matchId.match_phase) !== "GROUP")
+      .reduce(
+        (acc, item) => {
+          const finalPhase = getMatchPhase(item.matchId.match_phase);
+
+          if (!acc[finalPhase]) {
+            acc[finalPhase] = [];
+          }
+
+          acc[finalPhase].push(item);
+
+          return acc;
+        },
+        {} as Record<string, Prediction[]>,
+      ) || {};
 
   const groupedData = Object.entries(groupedPredictions);
+
+  const groupedFinalData = FINAL_PHASES.filter(
+    (phase) => groupedFinalPredictions[phase],
+  ).map(
+    (phase) => [phase, groupedFinalPredictions[phase]] as [
+      string,
+      Prediction[],
+    ],
+  );
+
+  const predictionSections: PredictionSection[] = hasFinalPredictions
+    ? [
+        {
+          title: "Fase de Grupos",
+          data: groupedData,
+          isFinalPhase: false,
+        },
+        {
+          title: "Fase Final",
+          data: groupedFinalData,
+          isFinalPhase: true,
+        },
+      ].filter((section) => section.data.length > 0)
+    : [
+        {
+          title: "",
+          data: groupedData,
+          isFinalPhase: false,
+        },
+      ];
 
   // const filteredbyToday =
   //   predictionByIdQuery.data?.predictionsByParticipant.filter((m) => {
@@ -201,6 +273,38 @@ export default function PersonalBetsScreen() {
     );
   }
 
+  function renderFinalGroup({ item }: { item: [string, Prediction[]] }) {
+    const [finalPhase, predictions] = item;
+
+    return (
+      <View style={styles.groupContainer}>
+        <Text style={styles.groupTitle}>{finalPhase}</Text>
+
+        <FlatList
+          data={predictions}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderPrediction}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  }
+
+  function renderSection({ item }: { item: PredictionSection }) {
+    return (
+      <View>
+        {item.title ? <Text style={styles.groupTitle}>{item.title}</Text> : null}
+
+        <FlatList
+          data={item.data}
+          keyExtractor={(item) => item[0]}
+          renderItem={item.isFinalPhase ? renderFinalGroup : renderGroup}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  }
+
   return (
     <SafeAreaProvider style={styles.container}>
       <SafeAreaView>
@@ -238,9 +342,9 @@ export default function PersonalBetsScreen() {
         )} */}
         <>
           <FlatList
-            data={groupedData}
-            keyExtractor={(item) => item[0]}
-            renderItem={renderGroup}
+            data={predictionSections}
+            keyExtractor={(item) => item.title || "Fase de Grupos"}
+            renderItem={renderSection}
             contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

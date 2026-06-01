@@ -6,6 +6,7 @@ import React from "react";
 import ParticipantScreen from "../(register-user)/participant";
 import TabLayout from "../(tabs)/tabs";
 import CControlScreen from "../ccontrol/ccontrol";
+import FinalsScreen from "../finals/finals";
 import LoginScreen from "../login/login";
 import PersonalBetsScreen from "../manage-bets/personal_bets";
 import StandingsTableScreen from "../manage-standings/StandingsTable";
@@ -53,6 +54,11 @@ export default function DrawerNavigation() {
             name="Resultados"
             component={ResultScreen}
             options={{ headerTitle: "Resultados" }}
+          />
+          <Drawer.Screen
+            name="Eliminatorias"
+            component={FinalsScreen}
+            options={{ headerTitle: "Eliminatorias" }}
           />
           <Drawer.Screen
             name="User"
@@ -103,6 +109,11 @@ export default function DrawerNavigation() {
             name="Resultados"
             component={ResultScreen}
             options={{ headerTitle: "Resultados" }}
+          />
+          <Drawer.Screen
+            name="Eliminatorias"
+            component={FinalsScreen}
+            options={{ headerTitle: "Eliminatorias" }}
           />
         </Drawer.Navigator>
       )}

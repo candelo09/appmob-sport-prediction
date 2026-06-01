@@ -18,6 +18,17 @@ import {
 import { Button } from "react-native-paper";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+const FINAL_PHASES = [
+  "ROUND_32",
+  "ROUND_16",
+  "QUARTER",
+  "SEMI",
+  "THIRD_PLACE",
+  "FINAL",
+] as const;
+
+const getMatchPhase = (matchPhase: string) => matchPhase.toUpperCase();
+
 // import MenuListLoggedInUser from '../../src/components/menuListHomeLogin/menuListLoggedInUser';
 // import Menu from '@/src/components/menuListHomeLogin/menuListLoggedInUser';
 
@@ -82,23 +93,38 @@ export default function HomeScreen() {
     );
   });
 
+  const hasFinalMatches =
+    matchsByDateQuery.data?.some(
+      (m) => getMatchPhase(m.match_phase) !== "GROUP",
+    ) || false;
+
   const groupedMatches =
-    filtered?.reduce(
-      (acc, item) => {
-        const groupLetter = item.group?.letter || "Sin Grupo";
+    filtered
+      ?.filter((item) =>
+        hasFinalMatches ? getMatchPhase(item.match_phase) !== "GROUP" : true,
+      )
+      .reduce(
+        (acc, item) => {
+          const groupLetter = hasFinalMatches
+            ? getMatchPhase(item.match_phase)
+            : item.group?.letter || "Sin Grupo";
 
-        if (!acc[groupLetter]) {
-          acc[groupLetter] = [];
-        }
+          if (!acc[groupLetter]) {
+            acc[groupLetter] = [];
+          }
 
-        acc[groupLetter].push(item);
+          acc[groupLetter].push(item);
 
-        return acc;
-      },
-      {} as Record<string, Match[]>,
-    ) || {};
+          return acc;
+        },
+        {} as Record<string, Match[]>,
+      ) || {};
 
-  const groupedData = Object.entries(groupedMatches);
+  const groupedData = hasFinalMatches
+    ? FINAL_PHASES.filter((phase) => groupedMatches[phase]).map(
+        (phase) => [phase, groupedMatches[phase]] as [string, Match[]],
+      )
+    : Object.entries(groupedMatches);
 
   function formatDate(iso: string | number | Date) {
     const d = new Date(iso);
@@ -154,7 +180,11 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.metaRow}>
-          <Text style={styles.stadium}>Grupo {item.group?.letter || ""}</Text>
+          <Text style={styles.stadium}>
+            {hasFinalMatches
+              ? `Fase ${getMatchPhase(item.match_phase)}`
+              : `Grupo ${item.group?.letter || ""}`}
+          </Text>
           <Text style={styles.stadium}>Estadio {item.stadium}</Text>
           <Text style={{ color, fontWeight: "bold" }}>{item.stage}</Text>
         </View>
@@ -167,7 +197,9 @@ export default function HomeScreen() {
 
     return (
       <View style={styles.groupContainer}>
-        <Text style={styles.groupTitle}>GRUPO {groupLetter}</Text>
+        <Text style={styles.groupTitle}>
+          {hasFinalMatches ? groupLetter : `GRUPO ${groupLetter}`}
+        </Text>
 
         <FlatList
           data={matches}

@@ -17,6 +17,17 @@ import {
 
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
+const FINAL_PHASES = [
+  "ROUND_32",
+  "ROUND_16",
+  "QUARTER",
+  "SEMI",
+  "THIRD_PLACE",
+  "FINAL",
+] as const;
+
+const getMatchPhase = (matchPhase: string) => matchPhase.toUpperCase();
+
 // import MenuListLoggedInUser from '../../src/components/menuListHomeLogin/menuListLoggedInUser';
 // import Menu from '@/src/components/menuListHomeLogin/menuListLoggedInUser';
 
@@ -52,7 +63,7 @@ export default function BetsScreen() {
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
       m.stage.toLowerCase().includes(q) ||
-      `grupo ${m.group.letter.toLowerCase()}`.includes(q)
+      `grupo ${m.group?.letter?.toLowerCase() || ""}`.includes(q)
     );
   });
 
@@ -64,45 +75,77 @@ export default function BetsScreen() {
       m.awayTeam.name.toLowerCase().includes(q) ||
       m.stadium.toLowerCase().includes(q) ||
       m.stage.toLowerCase().includes(q) ||
-      `grupo ${m.group.letter.toLowerCase()}`.includes(q)
+      `grupo ${m.group?.letter?.toLowerCase() || ""}`.includes(q)
     );
   });
 
+  const hasFinalMatches =
+    allMatchsQuery.data?.some(
+      (m) => getMatchPhase(m.match_phase) !== "GROUP",
+    ) || false;
+
   const groupedMatches =
-    filtered?.reduce(
-      (acc, item) => {
-        const groupLetter = item.group?.letter || "Sin Grupo";
+    filtered
+      ?.filter((item) =>
+        hasFinalMatches ? getMatchPhase(item.match_phase) !== "GROUP" : true,
+      )
+      .reduce(
+        (acc, item) => {
+          const groupLetter = hasFinalMatches
+            ? getMatchPhase(item.match_phase)
+            : item.group?.letter || "Sin Grupo";
 
-        if (!acc[groupLetter]) {
-          acc[groupLetter] = [];
-        }
+          if (!acc[groupLetter]) {
+            acc[groupLetter] = [];
+          }
 
-        acc[groupLetter].push(item);
+          acc[groupLetter].push(item);
 
-        return acc;
-      },
-      {} as Record<string, Match[]>,
-    ) || {};
+          return acc;
+        },
+        {} as Record<string, Match[]>,
+      ) || {};
 
-  const groupedData = Object.entries(groupedMatches);
+  const groupedData = hasFinalMatches
+    ? FINAL_PHASES.filter((phase) => groupedMatches[phase]).map(
+        (phase) => [phase, groupedMatches[phase]] as [string, Match[]],
+      )
+    : Object.entries(groupedMatches);
+
+  const hasFinalMatchesByToday =
+    matchsByDateQuery.data?.some(
+      (m) => getMatchPhase(m.match_phase) !== "GROUP",
+    ) || false;
 
   const groupedMatchesByToday =
-    filteredbyToday?.reduce(
-      (acc, item) => {
-        const groupLetter = item.group?.letter || "Sin Grupo";
+    filteredbyToday
+      ?.filter((item) =>
+        hasFinalMatchesByToday
+          ? getMatchPhase(item.match_phase) !== "GROUP"
+          : true,
+      )
+      .reduce(
+        (acc, item) => {
+          const groupLetter = hasFinalMatchesByToday
+            ? getMatchPhase(item.match_phase)
+            : item.group?.letter || "Sin Grupo";
 
-        if (!acc[groupLetter]) {
-          acc[groupLetter] = [];
-        }
+          if (!acc[groupLetter]) {
+            acc[groupLetter] = [];
+          }
 
-        acc[groupLetter].push(item);
+          acc[groupLetter].push(item);
 
-        return acc;
-      },
-      {} as Record<string, Match[]>,
-    ) || {};
+          return acc;
+        },
+        {} as Record<string, Match[]>,
+      ) || {};
 
-  const groupedDataByToday = Object.entries(groupedMatchesByToday);
+  const groupedDataByToday = hasFinalMatchesByToday
+    ? FINAL_PHASES.filter((phase) => groupedMatchesByToday[phase]).map(
+        (phase) => [phase, groupedMatchesByToday[phase]] as [string, Match[]],
+      )
+    : Object.entries(groupedMatchesByToday);
 
   // console.log(`filtered`, filtered);
 
@@ -185,7 +228,11 @@ export default function BetsScreen() {
       >
         <View style={styles.metaRow}>
           <Text style={styles.date}>{formatDate(item.match_date)}</Text>
-          <Text style={styles.group}>Grupo {item.group?.letter || ""}</Text>
+          <Text style={styles.group}>
+            {getMatchPhase(item.match_phase) === "GROUP"
+              ? `Grupo ${item.group?.letter || ""}`
+              : `Fase ${getMatchPhase(item.match_phase)}`}
+          </Text>
         </View>
         <View style={styles.teamsRow}>
           <View style={styles.team}>
@@ -222,7 +269,11 @@ export default function BetsScreen() {
 
     return (
       <View style={styles.groupContainer}>
-        <Text style={styles.groupTitle}>GRUPO {groupLetter}</Text>
+        <Text style={styles.groupTitle}>
+          {getMatchPhase(matches[0].match_phase) === "GROUP"
+            ? `GRUPO ${groupLetter}`
+            : groupLetter}
+        </Text>
 
         <FlatList
           data={matches}
