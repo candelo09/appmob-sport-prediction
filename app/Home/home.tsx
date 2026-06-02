@@ -129,19 +129,25 @@ export default function HomeScreen() {
         {} as Record<string, Match[]>,
       ) || {};
 
-  const groupedData = FINAL_PHASES.filter((phase) => groupedMatches[phase]).map(
-    (phase) =>
-      [PHASE_LABELS[phase] || phase, groupedMatches[phase]] as [
-        string,
-        Match[],
-      ],
-  );
+  // const groupedFinalData = FINAL_PHASES.filter(
+  //   (phase) => groupedMatches[phase],
+  // ).map(
+  //   (phase) =>
+  //     [PHASE_LABELS[phase] || phase, groupedMatches[phase]] as [
+  //       string,
+  //       Match[],
+  //     ],
+  // );
 
-  // const groupedData = hasFinalMatches
-  //   ? FINAL_PHASES.filter((phase) => groupedMatches[phase]).map(
-  //       (phase) => [phase, groupedMatches[phase]] as [string, Match[]],
-  //     )
-  //   : Object.entries(groupedMatches);
+  const groupedData = hasFinalMatches
+    ? FINAL_PHASES.filter((phase) => groupedMatches[phase]).map(
+        (phase) =>
+          [PHASE_LABELS[phase] || phase, groupedMatches[phase]] as [
+            string,
+            Match[],
+          ],
+      )
+    : Object.entries(groupedMatches);
 
   function formatDate(iso: string | number | Date) {
     const d = new Date(iso);
