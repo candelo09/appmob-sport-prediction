@@ -26,6 +26,15 @@ const FINAL_PHASES = [
   "FINAL",
 ] as const;
 
+const PHASE_LABELS: Record<string, string> = {
+  ROUND_32: "DIECISEISAVOS",
+  ROUND_16: "OCTAVOS",
+  QUARTER: "CUARTOS",
+  SEMI: "SEMIFINAL",
+  THIRD_PLACE: "TERCER PUESTO",
+  FINAL: "FINAL",
+};
+
 const getMatchPhase = (matchPhase: string) => matchPhase.toUpperCase();
 
 // import MenuListLoggedInUser from '../../src/components/menuListHomeLogin/menuListLoggedInUser';
@@ -108,7 +117,11 @@ export default function BetsScreen() {
 
   const groupedData = hasFinalMatches
     ? FINAL_PHASES.filter((phase) => groupedMatches[phase]).map(
-        (phase) => [phase, groupedMatches[phase]] as [string, Match[]],
+        (phase) =>
+          [PHASE_LABELS[phase] || phase, groupedMatches[phase]] as [
+            string,
+            Match[],
+          ],
       )
     : Object.entries(groupedMatches);
 
@@ -143,7 +156,11 @@ export default function BetsScreen() {
 
   const groupedDataByToday = hasFinalMatchesByToday
     ? FINAL_PHASES.filter((phase) => groupedMatchesByToday[phase]).map(
-        (phase) => [phase, groupedMatchesByToday[phase]] as [string, Match[]],
+        (phase) =>
+          [PHASE_LABELS[phase] || phase, groupedMatchesByToday[phase]] as [
+            string,
+            Match[],
+          ],
       )
     : Object.entries(groupedMatchesByToday);
 

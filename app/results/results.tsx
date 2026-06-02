@@ -24,6 +24,15 @@ const FINAL_PHASES = [
   "FINAL",
 ] as const;
 
+const PHASE_LABELS: Record<string, string> = {
+  ROUND_32: "DIECISEISAVOS",
+  ROUND_16: "OCTAVOS",
+  QUARTER: "CUARTOS",
+  SEMI: "SEMIFINAL",
+  THIRD_PLACE: "TERCER PUESTO",
+  FINAL: "FINAL",
+};
+
 const getMatchPhase = (matchPhase: string) => matchPhase.toUpperCase();
 
 type ResultSection = {
@@ -127,9 +136,19 @@ export default function ResultScreen() {
 
   const groupedData = Object.entries(groupedMatches);
 
+  // const groupedFinalData = FINAL_PHASES.filter(
+  //   (phase) => groupedFinalMatches[phase],
+  // ).map((phase) => [phase, groupedFinalMatches[phase]] as [string, Match[]]);
+
   const groupedFinalData = FINAL_PHASES.filter(
     (phase) => groupedFinalMatches[phase],
-  ).map((phase) => [phase, groupedFinalMatches[phase]] as [string, Match[]]);
+  ).map(
+    (phase) =>
+      [PHASE_LABELS[phase] || phase, groupedFinalMatches[phase]] as [
+        string,
+        Match[],
+      ],
+  );
 
   const resultSections: ResultSection[] = hasFinalMatches
     ? [
@@ -198,7 +217,11 @@ export default function ResultScreen() {
   const groupedFinalDataByToday = FINAL_PHASES.filter(
     (phase) => groupedFinalMatchesByToday[phase],
   ).map(
-    (phase) => [phase, groupedFinalMatchesByToday[phase]] as [string, Match[]],
+    (phase) =>
+      [PHASE_LABELS[phase] || phase, groupedFinalMatchesByToday[phase]] as [
+        string,
+        Match[],
+      ],
   );
 
   const resultSectionsByToday: ResultSection[] = hasFinalMatchesByToday
@@ -361,7 +384,9 @@ export default function ResultScreen() {
   function renderSection({ item }: { item: ResultSection }) {
     return (
       <View>
-        {item.title ? <Text style={styles.groupTitle}>{item.title}</Text> : null}
+        {item.title ? (
+          <Text style={styles.groupTitle}>{item.title}</Text>
+        ) : null}
 
         <FlatList
           data={item.data}

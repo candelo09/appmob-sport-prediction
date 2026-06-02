@@ -27,6 +27,15 @@ const FINAL_PHASES = [
   "FINAL",
 ] as const;
 
+const PHASE_LABELS: Record<string, string> = {
+  ROUND_32: "DIECISEISAVOS",
+  ROUND_16: "OCTAVOS",
+  QUARTER: "CUARTOS",
+  SEMI: "SEMIFINAL",
+  THIRD_PLACE: "TERCER PUESTO",
+  FINAL: "FINAL",
+};
+
 const getMatchPhase = (matchPhase: string) => matchPhase.toUpperCase();
 
 // import MenuListLoggedInUser from '../../src/components/menuListHomeLogin/menuListLoggedInUser';
@@ -120,11 +129,19 @@ export default function HomeScreen() {
         {} as Record<string, Match[]>,
       ) || {};
 
-  const groupedData = hasFinalMatches
-    ? FINAL_PHASES.filter((phase) => groupedMatches[phase]).map(
-        (phase) => [phase, groupedMatches[phase]] as [string, Match[]],
-      )
-    : Object.entries(groupedMatches);
+  const groupedData = FINAL_PHASES.filter((phase) => groupedMatches[phase]).map(
+    (phase) =>
+      [PHASE_LABELS[phase] || phase, groupedMatches[phase]] as [
+        string,
+        Match[],
+      ],
+  );
+
+  // const groupedData = hasFinalMatches
+  //   ? FINAL_PHASES.filter((phase) => groupedMatches[phase]).map(
+  //       (phase) => [phase, groupedMatches[phase]] as [string, Match[]],
+  //     )
+  //   : Object.entries(groupedMatches);
 
   function formatDate(iso: string | number | Date) {
     const d = new Date(iso);

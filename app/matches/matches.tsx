@@ -16,6 +16,32 @@ import {
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 
+const FINAL_PHASES = [
+  "ROUND_32",
+  "ROUND_16",
+  "QUARTER",
+  "SEMI",
+  "THIRD_PLACE",
+  "FINAL",
+] as const;
+
+const PHASE_LABELS: Record<string, string> = {
+  ROUND_32: "DIECISEISAVOS",
+  ROUND_16: "OCTAVOS",
+  QUARTER: "CUARTOS",
+  SEMI: "SEMIFINAL",
+  THIRD_PLACE: "TERCER PUESTO",
+  FINAL: "FINAL",
+};
+
+const getMatchPhase = (matchPhase: string) => matchPhase.toUpperCase();
+
+type MatchSection = {
+  title: string;
+  data: [string, Match[]][];
+  isFinalPhase: boolean;
+};
+
 // import MenuListLoggedInUser from '../../src/components/menuListHomeLogin/menuListLoggedInUser';
 // import Menu from '@/src/components/menuListHomeLogin/menuListLoggedInUser';
 
@@ -70,23 +96,79 @@ export default function MatchScreen() {
     );
   });
 
+  const hasFinalMatches =
+    allMatchsQuery.data?.some(
+      (m) => getMatchPhase(m.match_phase) !== "GROUP",
+    ) || false;
+
   const groupedMatches =
-    filterByParticipant?.reduce(
-      (acc, item) => {
-        const groupLetter = item.group?.letter || "Sin Grupo";
+    filterByParticipant
+      ?.filter((item) => getMatchPhase(item.match_phase) === "GROUP")
+      .reduce(
+        (acc, item) => {
+          const groupLetter = item.group?.letter || "Sin Grupo";
 
-        if (!acc[groupLetter]) {
-          acc[groupLetter] = [];
-        }
+          if (!acc[groupLetter]) {
+            acc[groupLetter] = [];
+          }
 
-        acc[groupLetter].push(item);
+          acc[groupLetter].push(item);
 
-        return acc;
-      },
-      {} as Record<string, Match[]>,
-    ) || {};
+          return acc;
+        },
+        {} as Record<string, Match[]>,
+      ) || {};
+
+  const groupedFinalMatches =
+    filterByParticipant
+      ?.filter((item) => getMatchPhase(item.match_phase) !== "GROUP")
+      .reduce(
+        (acc, item) => {
+          const finalPhase = getMatchPhase(item.match_phase);
+
+          if (!acc[finalPhase]) {
+            acc[finalPhase] = [];
+          }
+
+          acc[finalPhase].push(item);
+
+          return acc;
+        },
+        {} as Record<string, Match[]>,
+      ) || {};
 
   const groupedData = Object.entries(groupedMatches);
+
+  const groupedFinalData = FINAL_PHASES.filter(
+    (phase) => groupedFinalMatches[phase],
+  ).map(
+    (phase) =>
+      [PHASE_LABELS[phase] || phase, groupedFinalMatches[phase]] as [
+        string,
+        Match[],
+      ],
+  );
+
+  const matchSections: MatchSection[] = hasFinalMatches
+    ? [
+        {
+          title: "Fase de Grupos",
+          data: groupedData,
+          isFinalPhase: false,
+        },
+        {
+          title: "Fase Final",
+          data: groupedFinalData,
+          isFinalPhase: true,
+        },
+      ].filter((section) => section.data.length > 0)
+    : [
+        {
+          title: "",
+          data: groupedData,
+          isFinalPhase: false,
+        },
+      ];
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -115,7 +197,11 @@ export default function MatchScreen() {
       >
         <View style={styles.metaRow}>
           <Text style={styles.date}>{formatDate(item.match_date)}</Text>
-          <Text style={styles.group}>Grupo {item.group?.letter || ""}</Text>
+          <Text style={styles.group}>
+            {getMatchPhase(item.match_phase) === "GROUP"
+              ? `Grupo ${item.group?.letter || ""}`
+              : `Fase ${getMatchPhase(item.match_phase)}`}
+          </Text>
         </View>
         <View style={styles.teamsRow}>
           <View style={styles.team}>
@@ -182,6 +268,40 @@ export default function MatchScreen() {
     );
   }
 
+  function renderFinalGroup({ item }: { item: [string, Match[]] }) {
+    const [finalPhase, matches] = item;
+
+    return (
+      <View style={styles.groupContainer}>
+        <Text style={styles.groupTitle}>{finalPhase}</Text>
+
+        <FlatList
+          data={matches}
+          keyExtractor={(item: Match) => item.id.toString()}
+          renderItem={renderItem}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  }
+
+  function renderSection({ item }: { item: MatchSection }) {
+    return (
+      <View>
+        {item.title ? (
+          <Text style={styles.groupTitle}>{item.title}</Text>
+        ) : null}
+
+        <FlatList
+          data={item.data}
+          keyExtractor={(item) => item[0]}
+          renderItem={item.isFinalPhase ? renderFinalGroup : renderGroup}
+          scrollEnabled={false}
+        />
+      </View>
+    );
+  }
+
   // const renderItem: ListRenderItem<Match> = ({ item }) => (
   //   <Pressable
   //     style={styles.card}
@@ -240,9 +360,9 @@ export default function MatchScreen() {
       {/* LISTA */}
 
       <FlatList
-        data={groupedData}
-        keyExtractor={(item) => item[0]}
-        renderItem={renderGroup}
+        data={matchSections}
+        keyExtractor={(item) => item.title || "Fase de Grupos"}
+        renderItem={renderSection}
         contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
