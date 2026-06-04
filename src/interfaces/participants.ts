@@ -8,6 +8,7 @@ export interface Participant {
   perfil: string;
   password: string;
   created_at: Date | undefined;
+  position_part: number;
 }
 
 export interface Token {

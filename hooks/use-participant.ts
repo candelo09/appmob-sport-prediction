@@ -2,6 +2,7 @@ import { useAuthContext } from "@/src/context/AuthContext";
 import { Participant } from "@/src/interfaces/participants";
 import {
   allParticipant,
+  deleteParticipant,
   saveParticipant,
   updateParticipant,
 } from "@/src/services/participant-service";
@@ -114,5 +115,9 @@ export default function useCreateParticipant() {
     updateParticipant(body_participant.id || 0, body_participant);
   }
 
-  return { toCreateParticipant, toUpdateParticipant };
+  function toDeleteParticipant(id: number) {
+    return deleteParticipant(id);
+  }
+
+  return { toCreateParticipant, toUpdateParticipant, toDeleteParticipant };
 }

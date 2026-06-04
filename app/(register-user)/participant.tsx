@@ -1,10 +1,14 @@
-import { useAllParticipants } from "@/hooks/use-participant";
+import useCreateParticipant, {
+  useAllParticipants,
+} from "@/hooks/use-participant";
+import AlertModal from "@/src/components/alert-modal/alertModal";
 import AccountScreen from "@/src/components/participant/registerPage";
 import { Participant } from "@/src/interfaces/participants";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   ListRenderItem,
+  Modal,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -25,6 +29,14 @@ export default function ParticipantScreen() {
   );
   const [flagModalAccountUpdate, setFlagModalAccountUpdate] = useState(false);
   const { findallParticipant } = useAllParticipants();
+  const { toDeleteParticipant } = useCreateParticipant();
+  const [showModalDeleteParticipant, setShowModalDeleteParticipant] =
+    useState(false);
+  const [participantToDelete, setParticipantToDelete] =
+    useState<Participant>({} as Participant);
+  const [showModalAlert, setShowModalAlert] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
 
   useEffect(() => {
     findallParticipant.refetch();
@@ -50,6 +62,36 @@ export default function ParticipantScreen() {
     );
   });
 
+  const deleteParticipant = async (participant: Participant) => {
+    if (!participant.id) {
+      setShowModalDeleteParticipant(false);
+      setModalTitle("Error");
+      setModalMessage("No se pudo identificar el participante.");
+      setShowModalAlert(true);
+      return;
+    }
+
+    try {
+      await toDeleteParticipant(participant.id);
+      setShowModalDeleteParticipant(false);
+      await findallParticipant.refetch();
+      setModalTitle("Excelente!");
+      setModalMessage("Participante eliminado exitosamente.");
+      setShowModalAlert(true);
+    } catch (error) {
+      console.error(error);
+      setShowModalDeleteParticipant(false);
+      setModalTitle("Error");
+      setModalMessage("No se pudo eliminar el participante.");
+      setShowModalAlert(true);
+    }
+  };
+
+  const confirmDeleteParticipant = (participant: Participant) => {
+    setParticipantToDelete(participant);
+    setShowModalDeleteParticipant(true);
+  };
+
   const renderItem: ListRenderItem<Participant> = ({ item }) => (
     <Pressable
       style={styles.card}
@@ -60,8 +102,22 @@ export default function ParticipantScreen() {
       }}
     >
       <View style={styles.card}>
-        <Text style={styles.name}>{item.fullname}</Text>
-        <Text style={styles.sub}>{item.email}</Text>
+        <View style={styles.cardHeader}>
+          <View style={styles.cardInfo}>
+            <Text style={styles.name}>{item.fullname}</Text>
+            <Text style={styles.sub}>{item.email}</Text>
+          </View>
+
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={(event) => {
+              event.stopPropagation();
+              confirmDeleteParticipant(item);
+            }}
+          >
+            <Text style={styles.deleteButtonText}>Eliminar</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </Pressable>
   );
@@ -124,6 +180,45 @@ export default function ParticipantScreen() {
           ></AccountScreen>
         </>
       )}
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={showModalDeleteParticipant}
+        onRequestClose={() => setShowModalDeleteParticipant(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Confirmar</Text>
+            <Text style={styles.modalMessage}>
+              {"\u00bfEst\u00e1 seguro de eliminar este participante?"}
+            </Text>
+
+            <View style={styles.modalActions}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowModalDeleteParticipant(false)}
+              >
+                <Text style={styles.modalButtonText}>Cancelar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={() => deleteParticipant(participantToDelete)}
+              >
+                <Text style={styles.modalButtonText}>Confirmar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <AlertModal
+        visible={showModalAlert}
+        title={modalTitle}
+        messages={modalMessage}
+        onClose={() => setShowModalAlert(false)}
+      />
     </View>
   );
 }
@@ -149,6 +244,17 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+  },
+
+  cardInfo: {
+    flex: 1,
+  },
+
   name: {
     color: "#fff",
     fontSize: 16,
@@ -158,6 +264,73 @@ const styles = StyleSheet.create({
   sub: {
     color: "#aaa",
     fontSize: 13,
+  },
+
+  deleteButton: {
+    backgroundColor: "#dc3545",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+
+  deleteButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 12,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  modalCard: {
+    width: "80%",
+    backgroundColor: "#37425c",
+    borderRadius: 16,
+    padding: 20,
+    alignItems: "center",
+  },
+
+  modalTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+
+  modalMessage: {
+    color: "#e6f2ff",
+    fontSize: 14,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+
+  modalActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+
+  cancelButton: {
+    backgroundColor: "#4e6cff",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+  },
+
+  confirmButton: {
+    backgroundColor: "#dc3545",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+  },
+
+  modalButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 
   fab: {

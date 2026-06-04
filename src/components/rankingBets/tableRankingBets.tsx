@@ -39,7 +39,7 @@ export function TableRankingBets() {
 
             {allRankingsQuery.data?.map((item, index) => (
               <DataTable.Row key={item.id}>
-                <DataTable.Cell>{index + 1}</DataTable.Cell>
+                <DataTable.Cell>{item.position_rank}</DataTable.Cell>
                 <DataTable.Cell style={{ flex: 2 }} numeric>
                   {item.participant.fullname}
                 </DataTable.Cell>

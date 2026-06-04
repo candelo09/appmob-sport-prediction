@@ -46,3 +46,14 @@ export const updateParticipant = async (
     console.error(error);
   }
 };
+
+export const deleteParticipant = async (id: number) => {
+  try {
+    const { data } = await sportPredictionApi.delete(`participants/${id}`);
+
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};

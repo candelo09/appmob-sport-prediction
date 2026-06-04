@@ -48,6 +48,9 @@ export default function AccountScreen({
     phone: Yup.string().required("El telefono es obligatorio"),
     perfil: Yup.string().required("El perfil es obligatorio"),
     confirmPassword: Yup.string().required("Debe confirmar la contraseña"),
+    position_part: Yup.number()
+      .typeError("La posición debe ser numérica")
+      .required("La posición es obligatoria"),
   });
 
   // function handleCheckForm() {
@@ -86,8 +89,6 @@ export default function AccountScreen({
     // console.log(selectedPerfil);
     resetForm();
     const body: Participant = {
-      // id: 0,
-      // name: values.name,
       email: values.email,
       phone: values.phone,
       perfil: values.perfil,
@@ -97,6 +98,7 @@ export default function AccountScreen({
       fullname: `${values.name} ${values.surname}`,
       firstname: values.name,
       surname: values.surname,
+      position_part: Number(values.position_part),
     };
     if (values.password === values.confirmPassword) {
       // createParticipant(body);
@@ -146,7 +148,8 @@ export default function AccountScreen({
               phone: participant?.phone || "",
               password: participant?.password || "",
               confirmPassword: "",
-              perfil: "",
+              perfil: participant?.perfil || "",
+              position_part: participant?.position_part?.toString() || "",
             }}
             enableReinitialize={true}
             validationSchema={validationSchema}
@@ -215,6 +218,14 @@ export default function AccountScreen({
                   <Text style={styles.error}>{errors.phone}</Text>
                 )}
                 {/* <Text style={styles.label}>Selecciona el perfil</Text> */}
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Posición de inscripción"
+                  value={values.position_part}
+                  keyboardType="numeric"
+                  onChangeText={handleChange("position_part")}
+                />
                 <Picker
                   accessibilityLabel="Selecciona el perfil"
                   style={styles.inputPerfil}
