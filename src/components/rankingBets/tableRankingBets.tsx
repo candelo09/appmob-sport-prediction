@@ -1,6 +1,6 @@
 import { useRankgins } from "@/hooks/use-rankings";
 import { useCallback, useEffect, useState } from "react";
-import { RefreshControl, ScrollView, StyleSheet } from "react-native";
+import { RefreshControl, ScrollView, StyleSheet, Text } from "react-native";
 import { DataTable } from "react-native-paper";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 
@@ -32,13 +32,25 @@ export function TableRankingBets() {
         >
           <DataTable style={{ backgroundColor: "#fff" }}>
             <DataTable.Header>
-              <DataTable.Title>#</DataTable.Title>
-              <DataTable.Title numeric>Participante</DataTable.Title>
-              <DataTable.Title numeric>Puntos</DataTable.Title>
+              <DataTable.Title>
+                <Text style={{ fontWeight: "bold" }}>#</Text>
+              </DataTable.Title>
+              <DataTable.Title>
+                <Text style={{ fontWeight: "bold" }}>Pos. Inscripción</Text>
+              </DataTable.Title>
+              <DataTable.Title numeric>
+                <Text style={{ fontWeight: "bold" }}>Participante</Text>
+              </DataTable.Title>
+              <DataTable.Title numeric>
+                <Text style={{ fontWeight: "bold" }}>Puntos</Text>
+              </DataTable.Title>
             </DataTable.Header>
 
             {allRankingsQuery.data?.map((item, index) => (
               <DataTable.Row key={item.id}>
+                <DataTable.Cell>
+                  <Text style={{ fontWeight: "bold" }}>{index + 1}</Text>
+                </DataTable.Cell>
                 <DataTable.Cell>{item.position_rank}</DataTable.Cell>
                 <DataTable.Cell style={{ flex: 2 }} numeric>
                   {item.participant.fullname}
