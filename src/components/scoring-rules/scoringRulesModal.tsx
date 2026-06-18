@@ -2,6 +2,7 @@ import { ScoringRules } from "@/src/interfaces/scoring-rules";
 import React from "react";
 // import React, { useState } from "react";
 import { Button, Modal, StyleSheet, Text, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 type Props = {
   visible: boolean;
@@ -32,7 +33,86 @@ export default function ScoringRulesModal({
             backgroundColor: "rgba(0,0,0,0.5)",
           }}
         >
-          <View style={styles.card}>
+          <ScrollView
+            style={{ maxHeight: "80vh" as any }}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          >
+            <View style={styles.card}>
+              {scoringRules.map((item, index) => (
+                <View key={item.id || index} style={styles.cardRules}>
+                  <Text style={{ color: "#fff" }}>
+                    Siglas: {item.abbreviation}
+                  </Text>
+
+                  <Text style={{ color: "#fff" }}>
+                    Descripción: {item.description}
+                  </Text>
+
+                  <Text style={{ color: "#fff" }}>Puntos: {item.point}</Text>
+                </View>
+              ))}
+
+              <View style={styles.cardRules}>
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    marginBottom: 10,
+                  }}
+                >
+                  📋 Información General
+                </Text>
+
+                <Text style={{ color: "#fff", marginBottom: 5 }}>
+                  • Los puntos se acumulan durante todo el torneo.
+                </Text>
+
+                <Text style={{ color: "#fff", marginBottom: 5 }}>
+                  • El ranking se actualiza automáticamente después de cada
+                  partido finalizado.
+                </Text>
+
+                <Text style={{ color: "#fff", marginBottom: 5 }}>
+                  • En caso de empate en puntos, prevalece el orden de
+                  inscripción.
+                </Text>
+
+                <Text style={{ color: "#fff" }}>
+                  • Las reglas oficiales del torneo son las mostradas arriba.
+                </Text>
+              </View>
+
+              <View style={styles.cardRules}>
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 18,
+                    fontWeight: "bold",
+                    marginBottom: 10,
+                  }}
+                >
+                  🏆 Premios
+                </Text>
+
+                <Text style={{ color: "#fff", marginBottom: 5 }}>
+                  Distribución de lo recaudado o reunido:
+                </Text>
+
+                <Text style={{ color: "#fff", marginBottom: 5 }}>
+                  🥇 1° Puesto: 65%
+                </Text>
+
+                <Text style={{ color: "#fff", marginBottom: 5 }}>
+                  🥈 2° Puesto: 25%
+                </Text>
+
+                <Text style={{ color: "#fff" }}>🥉 3° Puesto: 10%</Text>
+              </View>
+            </View>
+          </ScrollView>
+
+          {/* <View style={styles.card}>
             <>
               {scoringRules.map((item, index) => (
                 <>
@@ -49,7 +129,7 @@ export default function ScoringRulesModal({
                 </>
               ))}
             </>
-          </View>
+          </View> */}
           <Button title="Cerrar" color="#b92727ff" onPress={onClose} />
         </View>
       </Modal>

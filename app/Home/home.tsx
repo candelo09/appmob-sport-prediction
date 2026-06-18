@@ -299,7 +299,7 @@ export default function HomeScreen() {
                   fontSize: 10,
                 }}
               >
-                Reglas
+                Reglas y Premios
               </Text>
             </Button>
           </View>
