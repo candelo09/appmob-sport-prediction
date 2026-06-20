@@ -24,6 +24,9 @@ export interface Match {
   stadium: string;
   group: Group;
   match_phase: string;
+  home_penalty_score: number;
+  away_penalty_score: number;
+  decided_by_penalties: boolean;
 }
 
 export interface MatchFinal {

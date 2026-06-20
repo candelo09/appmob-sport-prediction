@@ -50,6 +50,8 @@ export default function MatchScreen() {
   const [showModalCreateParticipant, setShowModalCreateParticipant] =
     useState(false);
   const [allMatch, setAllMatch] = useState<Match>({} as Match);
+  console.log("allMatch ", allMatch);
+
   const [selectedMatch, setSelectedMatch] = useState(false);
   // const [flagModalAccountUpdate, setFlagModalAccountUpdate] = useState(false);
   const { toCreateMatch, toUpdateMatch } = useMatch();

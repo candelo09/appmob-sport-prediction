@@ -38,9 +38,18 @@ export default function MatchModal({
   const { findallTeam: findallTeamFinales } = useAllTeamsFinales();
   const { allGroupsQuery } = useGroups();
   const hasQualifiedTeams = (findallTeamFinales.data?.length || 0) > 0;
+
+  const uniqueTeams = (findallTeamFinales.data || []).filter(
+    (item, index, self) =>
+      index === self.findIndex((t) => t.team.id === item.team.id),
+  );
+
   const teamsOptions = hasQualifiedTeams
-    ? findallTeamFinales.data?.map((qualifiedTeam) => qualifiedTeam.team) || []
+    ? uniqueTeams.map((item) => item.team)
     : findallTeam.data || [];
+  // const teamsOptions = hasQualifiedTeams
+  //   ? findallTeamFinales.data?.map((qualifiedTeam) => qualifiedTeam.team) || []
+  //   : findallTeam.data || [];
   const localTeamLabel = hasQualifiedTeams
     ? "Equipo local clasificado"
     : "Equipo local";
@@ -48,13 +57,15 @@ export default function MatchModal({
     ? "Equipo visitante clasificado"
     : "Equipo visitante";
   const finalPhases = [
-    "ROUND_32",
-    "ROUND_16",
-    "QUARTER",
-    "SEMI",
-    "THIRD_PLACE",
-    "FINAL",
+    { id: 1, cod: "ROUND_32", name: "DICISEISAVOS" },
+    { id: 2, cod: "ROUND_16", name: "OCTAVOS" },
+    { id: 3, cod: "QUARTER", name: "CUARTOS" },
+    { id: 4, cod: "SEMI", name: "SEMIFINALES" },
+    { id: 5, cod: "THIRD_PLACE", name: "TERCER LUGAR" },
+    { id: 6, cod: "FINAL", name: "FINAL" },
   ];
+
+  finalPhases.map((res) => console.log("cod ", res.cod));
   const validationSchema = Yup.object({
     homeTeam: Yup.string().required("Equipo local requerido"),
     awayTeam: Yup.string()
@@ -84,15 +95,13 @@ export default function MatchModal({
   //   return m.group.id;
   // });
 
-  console.log("matchs ", match.group);
+  // function groupTeam(groupId: number) {
+  //   if (groupId) return true;
 
-  function groupTeam(groupId: number) {
-    if (groupId) return true;
+  //   const getGruopTeam: any = findallTeam.data?.find((g) => g.id === groupId);
 
-    const getGruopTeam: any = findallTeam.data?.find((g) => g.id === groupId);
-
-    return getGruopTeam;
-  }
+  //   return getGruopTeam;
+  // }
 
   function formatDate(iso: string | number | Date) {
     if (!iso) return "";
@@ -121,6 +130,14 @@ export default function MatchModal({
       values.awayScore !== null &&
       values.awayScore !== undefined;
 
+    const hasScoresPenal =
+      values.home_penalty_score !== "" &&
+      values.home_penalty_score !== null &&
+      values.home_penalty_score !== undefined &&
+      values.away_penalty_score !== "" &&
+      values.away_penalty_score !== null &&
+      values.away_penalty_score !== undefined;
+
     const body: Match = {
       id: match?.id,
       homeTeam: values.homeTeam,
@@ -132,6 +149,9 @@ export default function MatchModal({
       stage: hasScores ? "Finalizado" : "Por Jugar",
       group: values.group,
       match_phase: values.match_phase,
+      home_penalty_score: hasScoresPenal ? values.home_penalty_score : null,
+      away_penalty_score: hasScoresPenal ? values.away_penalty_score : null,
+      decided_by_penalties: false,
     };
 
     onSave(body);
@@ -153,6 +173,9 @@ export default function MatchModal({
                 stadium: match?.stadium || "",
                 homeScore: match?.home_score?.toString() || "",
                 awayScore: match?.away_score?.toString() || "",
+                home_penalty_score: match?.home_penalty_score?.toString() || "",
+                away_penalty_score: match?.away_penalty_score?.toString() || "",
+                decided_by_penalties: match?.decided_by_penalties || false,
                 group:
                   match?.group !== undefined ? match?.group.id?.toString() : "",
                 match_phase: match?.match_phase || "",
@@ -220,25 +243,29 @@ export default function MatchModal({
                     onChangeText={handleChange("date")}
                   />
 
-                  {/* Grupos */}
-                  <Picker
-                    selectedValue={values.group}
-                    onValueChange={(value) => {
-                      handleChange("group")(value);
-                    }}
-                    style={styles.picker}
-                  >
-                    <Picker.Item label="Seleccione Grupo" value="" />
-                    {allGroupsQuery.data?.map((group) => (
-                      <Picker.Item
-                        key={group.id}
-                        label={group.letter}
-                        value={group.id.toString()}
-                      />
-                    ))}
-                  </Picker>
-                  {touched.homeTeam && errors.homeTeam && (
-                    <Text style={styles.error}>{errors.homeTeam}</Text>
+                  {!hasQualifiedTeams && (
+                    <>
+                      {/* Grupos */}
+                      <Picker
+                        selectedValue={values.group}
+                        onValueChange={(value) => {
+                          handleChange("group")(value);
+                        }}
+                        style={styles.picker}
+                      >
+                        <Picker.Item label="Seleccione Grupo" value="1" />
+                        {allGroupsQuery.data?.map((group) => (
+                          <Picker.Item
+                            key={group.id}
+                            label={group.letter}
+                            value={group.id.toString()}
+                          />
+                        ))}
+                      </Picker>
+                      {touched.homeTeam && errors.homeTeam && (
+                        <Text style={styles.error}>{errors.homeTeam}</Text>
+                      )}
+                    </>
                   )}
 
                   {/* Marcadores (solo útil en update) */}
@@ -254,9 +281,9 @@ export default function MatchModal({
                         <Picker.Item label="Seleccione fase" value="" />
                         {finalPhases.map((phase) => (
                           <Picker.Item
-                            key={phase}
-                            label={phase}
-                            value={phase}
+                            key={phase.id}
+                            label={phase.name}
+                            value={phase.cod}
                           />
                         ))}
                       </Picker>
@@ -282,6 +309,32 @@ export default function MatchModal({
                       onChangeText={handleChange("awayScore")}
                     />
                   </View>
+
+                  {hasQualifiedTeams &&
+                    values.homeScore === values.awayScore &&
+                    values.homeScore !== "" &&
+                    values.awayScore !== "" && (
+                      <>
+                        <View style={{ top: 7 }}>
+                          <View style={styles.row}>
+                            <TextInput
+                              style={styles.score}
+                              placeholder="Penal Local"
+                              keyboardType="numeric"
+                              value={values.home_penalty_score}
+                              onChangeText={handleChange("home_penalty_score")}
+                            />
+                            <TextInput
+                              style={styles.score}
+                              placeholder="Penal Visitante"
+                              keyboardType="numeric"
+                              value={values.away_penalty_score}
+                              onChangeText={handleChange("away_penalty_score")}
+                            />
+                          </View>
+                        </View>
+                      </>
+                    )}
 
                   {/* Botones */}
                   <View style={styles.buttonContainer}>
