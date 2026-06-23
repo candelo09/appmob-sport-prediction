@@ -72,6 +72,7 @@ export default function useBet() {
     matchBet: Match,
     valueHomeTeam: number,
     valueAwayTeam: number,
+    qualified_team_id?: number,
   ) {
     const participantId: Participant = {
       fullname: `${user?.firstname} ${user?.surname}`,
@@ -92,6 +93,7 @@ export default function useBet() {
       created_at: new Date(),
       participantId: participantId,
       matchId: matchBet,
+      qualified_team_id: qualified_team_id,
     };
 
     createPrediction(prediction);
@@ -103,6 +105,7 @@ export default function useBet() {
     matchBet: Match,
     valueHomeTeam: number,
     valueAwayTeam: number,
+    qualified_team_id?: number,
   ) {
     const participantId: Participant = {
       fullname: `${user?.firstname} ${user?.surname}`,
@@ -123,6 +126,7 @@ export default function useBet() {
       created_at: new Date(),
       participantId: participantId,
       matchId: matchBet,
+      qualified_team_id: qualified_team_id,
     };
 
     updatePrediction(prediction.id, prediction);

@@ -1,4 +1,5 @@
 import useMatch, { useMatchs } from "@/hooks/use-matchs";
+import useSaveTeamsFinales from "@/hooks/use-teams";
 import MatchModalG from "@/src/components/match/MatchModalG";
 
 import { Match } from "@/src/interfaces/matchs";
@@ -51,6 +52,7 @@ export default function MatchScreen() {
     useState(false);
   const [allMatch, setAllMatch] = useState<Match>({} as Match);
   console.log("allMatch ", allMatch);
+  const { toCreateTeamFinal } = useSaveTeamsFinales();
 
   const [selectedMatch, setSelectedMatch] = useState(false);
   // const [flagModalAccountUpdate, setFlagModalAccountUpdate] = useState(false);
@@ -394,15 +396,21 @@ export default function MatchScreen() {
       {showModalCreateParticipant ? (
         <MatchModalG
           visible={showModalCreateParticipant}
-          match={allMatch}
+          match={selectedMatch ? allMatch : ({} as Match)}
           title={selectedMatch ? "Editar Partido" : "Crear Partido"}
           buttonText={selectedMatch ? "Actualizar" : "Crear"}
           onClose={() => setShowModalCreateParticipant(false)}
           onSave={(data) => {
-            if (data.id) {
+            if (selectedMatch) {
               toUpdateMatch(data);
             } else {
               toCreateMatch(data);
+            }
+          }}
+          onSaveFinalMatch={(data) => {
+            if (selectedMatch) {
+              toCreateTeamFinal(data);
+            } else {
             }
           }}
         ></MatchModalG>

@@ -233,12 +233,12 @@ export default function BetsScreen() {
       <Pressable
         style={styles.card}
         onPress={() => {
-          if (diffMinutes <= 0) {
-            alert(
-              "¡Ups! El tiempo para realizar apuestas en este partido ya ha finalizado.",
-            );
-            return;
-          }
+          // if (diffMinutes <= 0) {
+          //   alert(
+          //     "¡Ups! El tiempo para realizar apuestas en este partido ya ha finalizado.",
+          //   );
+          //   return;
+          // }
           setShowModalBet(true);
           setMatchId(item);
         }}

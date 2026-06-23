@@ -37,10 +37,14 @@ export default function MatchModal({
   const [valueHomeTeam, onChangeValueHomeTeam] = useState<string>("");
   const [valueAwayTeam, onChangeValueAwayTeam] = useState<string>("");
 
+  const [qualifiedTeamId, setQualifiedTeamId] = useState<number | null>(null);
+
   React.useEffect(() => {
     if (alreadyBet) {
       onChangeValueHomeTeam(alreadyBet.predicted_home_score.toString());
       onChangeValueAwayTeam(alreadyBet.predicted_away_score.toString());
+
+      setQualifiedTeamId(alreadyBet.qualified_team_id ?? null);
     }
   }, [alreadyBet]);
 
@@ -88,6 +92,8 @@ export default function MatchModal({
               backgroundColor: "#4b4b4bff",
               padding: 20,
               borderRadius: 10,
+              width: 480,
+              maxWidth: "95%",
             }}
           >
             <>
@@ -132,12 +138,18 @@ export default function MatchModal({
                   style={styles.teamName}
                   placeholder=""
                 />
+                <Text style={{ color: "#ffff", fontSize: 15 }}>
+                  ({matchId.home_score})
+                </Text>
                 {/* <Text style={styles.teamName}>{matchId.item.homeTeam!.name}</Text> */}
               </View>
 
               <Text style={styles.vs}>vs</Text>
 
               <View style={styles.teamRight}>
+                <Text style={{ color: "#ffff", fontSize: 15 }}>
+                  ({matchId.away_score})
+                </Text>
                 <TextInput
                   editable={diffMinutes <= 0 ? false : true}
                   keyboardType="numeric"
@@ -153,6 +165,66 @@ export default function MatchModal({
                 />
               </View>
             </View>
+
+            {matchId.match_phase !== "GROUP" &&
+              valueHomeTeam === valueAwayTeam &&
+              valueHomeTeam !== "" &&
+              valueAwayTeam !== "" && (
+                <View
+                  style={{
+                    marginBottom: 15,
+                    backgroundColor: "#5a5a5aff",
+                    padding: 12,
+                    borderRadius: 8,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontWeight: "700",
+                      marginBottom: 10,
+                      textAlign: "center",
+                    }}
+                  >
+                    🏆 ¿Quién clasifica?
+                  </Text>
+
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-around",
+                    }}
+                  >
+                    <Button
+                      title={matchId.homeTeam?.name || "Local"}
+                      color={
+                        qualifiedTeamId === matchId.homeTeam?.id
+                          ? "#1f9d55"
+                          : "#6b7280"
+                      }
+                      onPress={
+                        diffMinutes <= 0
+                          ? undefined
+                          : () => setQualifiedTeamId(matchId.homeTeam?.id)
+                      }
+                    />
+
+                    <Button
+                      title={matchId.awayTeam?.name || "Visitante"}
+                      color={
+                        qualifiedTeamId === matchId.awayTeam?.id
+                          ? "#1f9d55"
+                          : "#6b7280"
+                      }
+                      onPress={
+                        diffMinutes <= 0
+                          ? undefined
+                          : () => setQualifiedTeamId(matchId.awayTeam?.id)
+                      }
+                    />
+                  </View>
+                </View>
+              )}
 
             {/* <View style={styles.metaRow}>
               <Text style={styles.date}>{formatDate(matchId.item.match_date)}</Text>
@@ -183,12 +255,14 @@ export default function MatchModal({
                           //   );
                           //   return;
                           // }
+
                           if (alreadyBet) {
                             updateBet(
                               alreadyBet.id,
                               matchId,
                               parseInt(valueHomeTeam),
                               parseInt(valueAwayTeam),
+                              qualifiedTeamId ?? undefined,
                             );
                             return;
                           }
@@ -196,6 +270,7 @@ export default function MatchModal({
                             matchId,
                             parseInt(valueHomeTeam),
                             parseInt(valueAwayTeam),
+                            qualifiedTeamId ?? undefined,
                           );
                           onClose();
                         }}

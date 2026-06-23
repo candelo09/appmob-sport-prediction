@@ -1,7 +1,7 @@
 import { useGroups } from "@/hooks/use-group";
 import { useAllTeams, useAllTeamsFinales } from "@/hooks/use-teams";
 import AlertModal from "@/src/components/alert-modal/alertModal";
-import { Match } from "@/src/interfaces/matchs";
+import { Match, MatchFinal, Team } from "@/src/interfaces/matchs";
 import { Picker } from "@react-native-picker/picker";
 import { Formik } from "formik";
 import { useState } from "react";
@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Checkbox } from "react-native-paper";
 import * as Yup from "yup";
 
 type Props = {
@@ -23,6 +24,7 @@ type Props = {
   buttonText: string;
   onClose: () => void;
   onSave: (data: Match) => void;
+  onSaveFinalMatch: (data: MatchFinal) => void;
 };
 
 export default function MatchModal({
@@ -32,6 +34,7 @@ export default function MatchModal({
   buttonText,
   onClose,
   onSave,
+  onSaveFinalMatch,
 }: Props) {
   const [showAlert, setShowAlert] = useState(false);
   const { findallTeam } = useAllTeams();
@@ -43,6 +46,11 @@ export default function MatchModal({
     (item, index, self) =>
       index === self.findIndex((t) => t.team.id === item.team.id),
   );
+  console.log("match ", match);
+
+  const [checked, setChecked] = useState(false);
+
+  const [qualifiedTeamId, setQualifiedTeamId] = useState<number | null>(null);
 
   const teamsOptions = hasQualifiedTeams
     ? uniqueTeams.map((item) => item.team)
@@ -65,7 +73,6 @@ export default function MatchModal({
     { id: 6, cod: "FINAL", name: "FINAL" },
   ];
 
-  finalPhases.map((res) => console.log("cod ", res.cod));
   const validationSchema = Yup.object({
     homeTeam: Yup.string().required("Equipo local requerido"),
     awayTeam: Yup.string()
@@ -147,12 +154,33 @@ export default function MatchModal({
       home_score: hasScores ? values.homeScore : null,
       away_score: hasScores ? values.awayScore : null,
       stage: hasScores ? "Finalizado" : "Por Jugar",
-      group: values.group,
+      group: values.group || null,
       match_phase: values.match_phase,
       home_penalty_score: hasScoresPenal ? values.home_penalty_score : null,
       away_penalty_score: hasScoresPenal ? values.away_penalty_score : null,
-      decided_by_penalties: false,
+      decided_by_penalties: checked ? true : false,
     };
+
+    const team: Team = {
+      id: qualifiedTeamId ?? 0,
+      name: "",
+      flag: "",
+      group: match.group,
+    };
+
+    const bodyMatchFinal: MatchFinal = {
+      id: 0,
+      qualification_type: "MATCH_WINNER",
+      group_position: 0,
+      qualified_for_phase: values.match_phase_final,
+      created_at: new Date(),
+      team: team,
+      sourceGroup: match.group,
+    };
+
+    onSaveFinalMatch(bodyMatchFinal);
+
+    console.log("bodyMatchFinal ", bodyMatchFinal);
 
     onSave(body);
     setShowAlert(true);
@@ -176,9 +204,9 @@ export default function MatchModal({
                 home_penalty_score: match?.home_penalty_score?.toString() || "",
                 away_penalty_score: match?.away_penalty_score?.toString() || "",
                 decided_by_penalties: match?.decided_by_penalties || false,
-                group:
-                  match?.group !== undefined ? match?.group.id?.toString() : "",
+                group: match?.group?.id?.toString() || "",
                 match_phase: match?.match_phase || "",
+                match_phase_final: "",
               }}
               enableReinitialize
               validationSchema={validationSchema}
@@ -309,32 +337,179 @@ export default function MatchModal({
                       onChangeText={handleChange("awayScore")}
                     />
                   </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 10,
+                    }}
+                  >
+                    {values.homeScore === values.awayScore &&
+                      values.homeScore !== "" &&
+                      values.awayScore !== "" && (
+                        <>
+                          <Checkbox
+                            color="green"
+                            status={checked ? "checked" : "unchecked"}
+                            onPress={() => {
+                              setChecked(!checked);
+                            }}
+                          />
+                          <Text style={{ color: "#fff" }}>
+                            Definición por penales?
+                          </Text>
+                        </>
+                      )}
+                  </View>
 
-                  {hasQualifiedTeams &&
-                    values.homeScore === values.awayScore &&
-                    values.homeScore !== "" &&
-                    values.awayScore !== "" && (
-                      <>
-                        <View style={{ top: 7 }}>
-                          <View style={styles.row}>
-                            <TextInput
-                              style={styles.score}
-                              placeholder="Penal Local"
-                              keyboardType="numeric"
-                              value={values.home_penalty_score}
-                              onChangeText={handleChange("home_penalty_score")}
-                            />
-                            <TextInput
-                              style={styles.score}
-                              placeholder="Penal Visitante"
-                              keyboardType="numeric"
-                              value={values.away_penalty_score}
-                              onChangeText={handleChange("away_penalty_score")}
-                            />
-                          </View>
+                  {checked && (
+                    <>
+                      <View style={{ top: 7 }}>
+                        <View style={styles.row}>
+                          <TextInput
+                            style={styles.score}
+                            placeholder="Penal Local"
+                            keyboardType="numeric"
+                            value={values.home_penalty_score}
+                            onChangeText={handleChange("home_penalty_score")}
+                          />
+                          <TextInput
+                            style={styles.score}
+                            placeholder="Penal Visitante"
+                            keyboardType="numeric"
+                            value={values.away_penalty_score}
+                            onChangeText={handleChange("away_penalty_score")}
+                          />
                         </View>
-                      </>
-                    )}
+                      </View>
+                    </>
+                  )}
+
+                  {checked && (
+                    <View
+                      style={{
+                        marginTop: 15,
+                        marginBottom: 15,
+                        backgroundColor: "#2c3e66",
+                        padding: 12,
+                        borderRadius: 10,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: "#fff",
+                          fontWeight: "700",
+                          marginBottom: 10,
+                          textAlign: "center",
+                        }}
+                      >
+                        🏆 ¿Quién clasificó?
+                      </Text>
+
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                        }}
+                      >
+                        <TouchableOpacity
+                          style={{
+                            flex: 1,
+                            marginRight: 5,
+                            backgroundColor:
+                              qualifiedTeamId === Number(values.homeTeam)
+                                ? "#16a34a"
+                                : "#64748b",
+                            padding: 10,
+                            borderRadius: 8,
+                            alignItems: "center",
+                          }}
+                          onPress={() =>
+                            setQualifiedTeamId(Number(values.homeTeam))
+                          }
+                        >
+                          <Text
+                            style={{
+                              color: "#fff",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {
+                              teamsOptions.find(
+                                (t) => t.id === Number(values.homeTeam),
+                              )?.name
+                            }
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={{
+                            flex: 1,
+                            marginLeft: 5,
+                            backgroundColor:
+                              qualifiedTeamId === Number(values.awayTeam)
+                                ? "#16a34a"
+                                : "#64748b",
+                            padding: 10,
+                            borderRadius: 8,
+                            alignItems: "center",
+                          }}
+                          onPress={() =>
+                            setQualifiedTeamId(Number(values.awayTeam))
+                          }
+                        >
+                          <Text
+                            style={{
+                              color: "#fff",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            {
+                              teamsOptions.find(
+                                (t) => t.id === Number(values.awayTeam),
+                              )?.name
+                            }
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                      <View style={{ marginTop: 10 }}>
+                        <Text
+                          style={{
+                            color: "#fff",
+                            marginBottom: 5,
+                            fontWeight: "600",
+                          }}
+                        >
+                          🏆 ¿A qué ronda pasó?
+                        </Text>
+                        {hasQualifiedTeams && (
+                          <>
+                            <Picker
+                              selectedValue={values.match_phase_final}
+                              onValueChange={(value) => {
+                                handleChange("match_phase_final")(value);
+                              }}
+                              style={styles.picker}
+                            >
+                              <Picker.Item label="Seleccione fase" value="" />
+                              {finalPhases.map((phase) => (
+                                <Picker.Item
+                                  key={phase.id}
+                                  label={phase.name}
+                                  value={phase.cod}
+                                />
+                              ))}
+                            </Picker>
+                            {touched.match_phase_final &&
+                              errors.match_phase_final && (
+                                <Text style={styles.error}>
+                                  {errors.match_phase_final}
+                                </Text>
+                              )}
+                          </>
+                        )}
+                      </View>
+                    </View>
+                  )}
 
                   {/* Botones */}
                   <View style={styles.buttonContainer}>

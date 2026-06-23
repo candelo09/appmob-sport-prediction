@@ -27,3 +27,20 @@ export const allTeamsFinales = async () => {
     console.error(error);
   }
 };
+
+export const saveTeamsFinales = async (matchFinal: MatchFinal) => {
+  try {
+    const { data } = await sportPredictionApi.post<MatchFinal[]>(
+      "finales",
+      matchFinal,
+    );
+
+    const matchs = data;
+
+    // console.log(`matchs`, matchs);
+
+    return matchs;
+  } catch (error) {
+    console.error(error);
+  }
+};
