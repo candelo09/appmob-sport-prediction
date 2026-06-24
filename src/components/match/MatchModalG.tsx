@@ -37,25 +37,46 @@ export default function MatchModal({
   const { findallTeam } = useAllTeams();
   const { findallTeam: findallTeamFinales } = useAllTeamsFinales();
   const { allGroupsQuery } = useGroups();
-  const hasQualifiedTeams = (findallTeamFinales.data?.length || 0) > 0;
+  // const hasQualifiedTeams = (findallTeamFinales.data?.length || 0) > 0;
+
+  // const uniqueTeams = (findallTeamFinales.data || []).filter(
+  //   (item, index, self) =>
+  //     index === self.findIndex((t) => t.team.id === item.team.id),
+  // );
+
+  // const teamsOptions = hasQualifiedTeams
+  //   ? uniqueTeams.map((item) => item.team)
+  //   : findallTeam.data || [];
+  // // const teamsOptions = hasQualifiedTeams
+  // //   ? findallTeamFinales.data?.map((qualifiedTeam) => qualifiedTeam.team) || []
+  // //   : findallTeam.data || [];
+  // const localTeamLabel = hasQualifiedTeams
+  //   ? "Equipo local clasificado"
+  //   : "Equipo local";
+  // const awayTeamLabel = hasQualifiedTeams
+  //   ? "Equipo visitante clasificado"
+  //   : "Equipo visitante";
 
   const uniqueTeams = (findallTeamFinales.data || []).filter(
     (item, index, self) =>
       index === self.findIndex((t) => t.team.id === item.team.id),
   );
 
-  const teamsOptions = hasQualifiedTeams
+  // Solo usar clasificados cuando la fase NO sea GROUP
+  const isKnockoutPhase = match?.match_phase && match.match_phase !== "GROUP";
+
+  const teamsOptions = isKnockoutPhase
     ? uniqueTeams.map((item) => item.team)
     : findallTeam.data || [];
-  // const teamsOptions = hasQualifiedTeams
-  //   ? findallTeamFinales.data?.map((qualifiedTeam) => qualifiedTeam.team) || []
-  //   : findallTeam.data || [];
-  const localTeamLabel = hasQualifiedTeams
+
+  const localTeamLabel = isKnockoutPhase
     ? "Equipo local clasificado"
     : "Equipo local";
-  const awayTeamLabel = hasQualifiedTeams
+
+  const awayTeamLabel = isKnockoutPhase
     ? "Equipo visitante clasificado"
     : "Equipo visitante";
+
   const finalPhases = [
     { id: 1, cod: "ROUND_32", name: "DICISEISAVOS" },
     { id: 2, cod: "ROUND_16", name: "OCTAVOS" },
@@ -81,7 +102,7 @@ export default function MatchModal({
           );
         },
       ),
-    match_phase: hasQualifiedTeams
+    match_phase: isKnockoutPhase
       ? Yup.string().required("Fase requerida")
       : Yup.string(),
     date: Yup.string().required("Fecha requerida"),
@@ -243,7 +264,7 @@ export default function MatchModal({
                     onChangeText={handleChange("date")}
                   />
 
-                  {!hasQualifiedTeams && (
+                  {!isKnockoutPhase && (
                     <>
                       {/* Grupos */}
                       <Picker
@@ -269,7 +290,7 @@ export default function MatchModal({
                   )}
 
                   {/* Marcadores (solo útil en update) */}
-                  {hasQualifiedTeams && (
+                  {isKnockoutPhase && (
                     <>
                       <Picker
                         selectedValue={values.match_phase}
@@ -310,7 +331,7 @@ export default function MatchModal({
                     />
                   </View>
 
-                  {hasQualifiedTeams &&
+                  {isKnockoutPhase &&
                     values.homeScore === values.awayScore &&
                     values.homeScore !== "" &&
                     values.awayScore !== "" && (
