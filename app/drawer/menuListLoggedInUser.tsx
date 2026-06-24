@@ -8,7 +8,7 @@ import TabLayout from "../(tabs)/tabs";
 import CControlScreen from "../ccontrol/ccontrol";
 import FinalsScreen from "../finals/finals";
 import LoginScreen from "../login/login";
-import PersonalBetsScreen from "../manage-bets/personal_bets";
+import ParticipantStandingsTableScreen from "../manage-standings/ParticipantStandingsTable";
 import StandingsTableScreen from "../manage-standings/StandingsTable";
 import MatchScreen from "../matches/matches";
 import ResultScreen from "../results/results";
@@ -34,17 +34,23 @@ export default function DrawerNavigation() {
           <Drawer.Screen name="Principal" component={TabLayout} />
           {/* <Drawer.Screen name="Perfil" component={UserScreen} /> */}
           <Drawer.Screen
-            name="Gestionar apuestas"
+            name="Mis Predicciones"
             component={BetsScreen}
             initialParams={{ userId: user?.id || 0 }}
             options={{ headerTitle: "Realiza tus apuestas" }}
           />
           <Drawer.Screen
+            name="Clasificación Pronosticada"
+            component={ParticipantStandingsTableScreen}
+            // initialParams={{ userId: user?.id || 0 }}
+            options={{ headerTitle: "Clasificación Pronosticada" }}
+          />
+          {/* <Drawer.Screen
             name="Mis Predicciones"
             component={PersonalBetsScreen}
             initialParams={{ userId: user?.id || 0 }}
             options={{ headerTitle: "Mis predicciones" }}
-          />
+          /> */}
           <Drawer.Screen
             name="Tabla de Posiciones"
             component={StandingsTableScreen}

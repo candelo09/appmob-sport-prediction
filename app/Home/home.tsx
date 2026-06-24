@@ -171,6 +171,10 @@ export default function HomeScreen() {
     }
   };
 
+  const formatScore = (score: number | null | undefined) => {
+    return score === null || score === undefined ? "-" : score;
+  };
+
   function renderItem({ item }: { item: Match }) {
     const color = getStatusColor(item.stage);
     return (
@@ -186,13 +190,13 @@ export default function HomeScreen() {
               style={styles.flag}
             />
             <Text style={styles.teamName}>{item.homeTeam!.name}</Text>
-            <Text style={styles.teamName}>{item.home_score}</Text>
+            <Text style={styles.score}>{formatScore(item.home_score)}</Text>
           </View>
 
           <Text style={styles.vs}>vs</Text>
 
           <View style={styles.teamRight}>
-            <Text style={styles.teamName}>{item.away_score}</Text>
+            <Text style={styles.score}>{formatScore(item.away_score)}</Text>
             <Text style={styles.teamName}>{item.awayTeam.name}</Text>
             <Image
               source={{ uri: item.awayTeam.flag }}
@@ -201,6 +205,15 @@ export default function HomeScreen() {
             />
           </View>
         </View>
+        <Text
+          style={{
+            color: "#fbbf24",
+            fontSize: 12,
+            textAlign: "center",
+          }}
+        >
+          Penales: {item.home_penalty_score} - {item.away_penalty_score}
+        </Text>
 
         <View style={styles.metaRow}>
           <Text style={styles.stadium}>
@@ -396,7 +409,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   date: { color: "#9fb8d6", bottom: 10 },
-  stadium: { color: "#ffffff" },
+  stadium: { color: "#ffffff", textAlign: "center" },
 
   empty: { padding: 40, alignItems: "center" },
   emptyText: { color: "#9fb8d6" },
@@ -488,4 +501,5 @@ const styles = StyleSheet.create({
     borderLeftColor: "#4e6cff",
     paddingLeft: 10,
   },
+  score: { color: "#ffffff", fontWeight: "bold", minWidth: 18 },
 });
