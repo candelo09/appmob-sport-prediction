@@ -166,6 +166,39 @@ export default function MatchModal({
               </View>
             </View>
 
+            {matchId.decided_by_penalties && (
+              <View
+                style={{
+                  backgroundColor: "#2f3640",
+                  borderRadius: 8,
+                  paddingVertical: 8,
+                  marginBottom: 15,
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#fbbf24",
+                    fontWeight: "700",
+                    fontSize: 13,
+                    marginBottom: 4,
+                  }}
+                >
+                  ⚽ Definido por penales
+                </Text>
+
+                <Text
+                  style={{
+                    color: "#fff",
+                    fontSize: 18,
+                    fontWeight: "bold",
+                  }}
+                >
+                  {matchId.home_penalty_score} - {matchId.away_penalty_score}
+                </Text>
+              </View>
+            )}
+
             {matchId.match_phase !== "GROUP" &&
               valueHomeTeam === valueAwayTeam &&
               valueHomeTeam !== "" &&

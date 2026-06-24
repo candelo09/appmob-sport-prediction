@@ -1,11 +1,11 @@
 import { useFinals } from "@/hooks/use-finals";
-import { useFocusEffect } from "@react-navigation/native";
 import { Match } from "@/src/interfaces/matchs";
 import {
   FINAL_PHASES,
   FinalPhase,
   getFinalPhase,
 } from "@/src/services/finals-service";
+import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useMemo, useState } from "react";
 import {
   FlatList,
@@ -161,6 +161,16 @@ export default function FinalsScreen() {
             />
           </View>
         </View>
+
+        <Text
+          style={{
+            color: "#fbbf24",
+            fontSize: 12,
+            textAlign: "center",
+          }}
+        >
+          Penales: {item.home_penalty_score} - {item.away_penalty_score}
+        </Text>
 
         <View style={styles.metaRow}>
           <Text style={styles.stadium}>Estadio {item.stadium}</Text>

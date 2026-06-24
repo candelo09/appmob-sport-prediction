@@ -302,6 +302,10 @@ export default function ResultScreen() {
     }
   };
 
+  const formatScore = (score: number | null | undefined) => {
+    return score === null || score === undefined ? "-" : score;
+  };
+
   function renderItem({ item }: { item: Match }) {
     const color = getStatusColor(item.stage);
 
@@ -323,13 +327,14 @@ export default function ResultScreen() {
               style={styles.flag}
             />
             <Text style={styles.teamName}>{item.homeTeam!.name}</Text>
-            <Text style={{ color: "#ffff" }}>{item.home_score}</Text>
+            <Text style={styles.score}>{formatScore(item.home_score)}</Text>
           </View>
 
           <Text style={styles.vs}>vs</Text>
 
           <View style={styles.teamRight}>
-            <Text style={{ color: "#ffff" }}>{item.away_score}</Text>
+            <Text style={styles.score}>{formatScore(item.away_score)}</Text>
+            {/* <Text style={{ color: "#ffff" }}>{item.away_score}</Text> */}
             <Text style={styles.teamName}>{item.awayTeam.name}</Text>
             <Image
               source={{ uri: item.awayTeam.flag }}
@@ -338,6 +343,15 @@ export default function ResultScreen() {
             />
           </View>
         </View>
+        <Text
+          style={{
+            color: "#fbbf24",
+            fontSize: 12,
+            textAlign: "center",
+          }}
+        >
+          Penales: {item.home_penalty_score} - {item.away_penalty_score}
+        </Text>
 
         <View style={styles.metaRow}>
           <Text style={styles.stadium}>Estadio {item.stadium}</Text>
@@ -649,4 +663,5 @@ const styles = StyleSheet.create({
     borderLeftColor: "#4e6cff",
     paddingLeft: 10,
   },
+  score: { color: "#ffffff", fontWeight: "bold", minWidth: 18 },
 });
