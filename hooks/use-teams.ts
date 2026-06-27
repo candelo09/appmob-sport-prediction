@@ -3,6 +3,7 @@ import {
   allTeams,
   allTeamsFinales,
   saveTeamsFinales,
+  teamByPhaseFinales,
 } from "@/src/services/teams-service";
 
 import { useQuery } from "@tanstack/react-query";
@@ -28,6 +29,17 @@ export const useAllTeamsFinales = () => {
 
   return {
     findallTeam,
+  };
+};
+
+export const useTeamsQualifiedFinales = (teamId?: number) => {
+  const findTeamQualified = useQuery({
+    queryKey: ["qualified-team", teamId],
+    queryFn: () => teamByPhaseFinales(teamId!),
+    enabled: !!teamId,
+  });
+  return {
+    findTeamQualified,
   };
 };
 

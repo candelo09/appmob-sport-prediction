@@ -50,12 +50,24 @@ export default function MatchModal({
 
   // console.log("predictionByIdQuery ", predictionByIdQuery.data);
 
+  // const handleChangeHomeTeamText = (text: string) => {
+  //   onChangeValueHomeTeam(text);
+  // };
+
   const handleChangeHomeTeamText = (text: string) => {
     onChangeValueHomeTeam(text);
+
+    updateQualifiedTeam(text, valueAwayTeam);
   };
+
+  // const handleChangeAwayTeamText = (text: string) => {
+  //   onChangeValueAwayTeam(text);
+  // };
 
   const handleChangeAwayTeamText = (text: string) => {
     onChangeValueAwayTeam(text);
+
+    updateQualifiedTeam(valueHomeTeam, text);
   };
 
   const { toBet, updateBet } = useBet();
@@ -70,6 +82,19 @@ export default function MatchModal({
 
   const diffMs = match_date.getTime() - date_now.getTime();
   const diffMinutes = diffMs / (1000 * 60);
+
+  const updateQualifiedTeam = (homeScore: string, awayScore: string) => {
+    const home = Number(homeScore);
+    const away = Number(awayScore);
+
+    if (home > away) {
+      setQualifiedTeamId(matchId.homeTeam.id);
+    } else if (away > home) {
+      setQualifiedTeamId(matchId.awayTeam.id);
+    } else {
+      setQualifiedTeamId(null);
+    }
+  };
 
   return (
     <View>
@@ -200,7 +225,6 @@ export default function MatchModal({
             )}
 
             {matchId.match_phase !== "GROUP" &&
-              valueHomeTeam === valueAwayTeam &&
               valueHomeTeam !== "" &&
               valueAwayTeam !== "" && (
                 <View
@@ -238,7 +262,13 @@ export default function MatchModal({
                       onPress={
                         diffMinutes <= 0
                           ? undefined
-                          : () => setQualifiedTeamId(matchId.homeTeam?.id)
+                          : () => {
+                              if (
+                                Number(valueHomeTeam) === Number(valueAwayTeam)
+                              ) {
+                                setQualifiedTeamId(matchId.awayTeam.id);
+                              }
+                            }
                       }
                     />
 
@@ -280,14 +310,17 @@ export default function MatchModal({
                         title="Apostar"
                         color="#298a3eff"
                         onPress={() => {
-                          // console.log("diffMinutes ", diffMinutes);
+                          // Se calcula nuevamente la hora actual
+                          const now = new Date();
+                          const matchDate = new Date(matchId.match_date);
 
-                          // if (diffMinutes <= 0) {
-                          //   alert(
-                          //     "¡Ups! El tiempo para realizar apuestas en este partido ya ha finalizado.",
-                          //   );
-                          //   return;
-                          // }
+                          if (matchDate <= now) {
+                            alert(
+                              "⏰ El partido ya comenzó. No es posible realizar o modificar la apuesta.",
+                            );
+                            onClose();
+                            return;
+                          }
 
                           if (alreadyBet) {
                             updateBet(
@@ -299,12 +332,14 @@ export default function MatchModal({
                             );
                             return;
                           }
+
                           toBet(
                             matchId,
                             parseInt(valueHomeTeam),
                             parseInt(valueAwayTeam),
                             qualifiedTeamId ?? undefined,
                           );
+
                           onClose();
                         }}
                       />

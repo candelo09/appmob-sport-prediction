@@ -28,6 +28,22 @@ export const allTeamsFinales = async () => {
   }
 };
 
+export const teamByPhaseFinales = async (team_id: number) => {
+  try {
+    const { data } = await sportPredictionApi.get<MatchFinal>(
+      `finales/by/team/phase/${team_id}`,
+    );
+
+    const qualifiedTeam = data;
+
+    // console.log(`qualifiedTeam`, qualifiedTeam);
+
+    return qualifiedTeam;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export const saveTeamsFinales = async (matchFinal: MatchFinal) => {
   try {
     const { data } = await sportPredictionApi.post<MatchFinal[]>(

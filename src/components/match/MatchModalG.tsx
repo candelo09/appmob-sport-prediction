@@ -1,10 +1,14 @@
 import { useGroups } from "@/hooks/use-group";
-import { useAllTeams, useAllTeamsFinales } from "@/hooks/use-teams";
+import {
+  useAllTeams,
+  useAllTeamsFinales,
+  useTeamsQualifiedFinales,
+} from "@/hooks/use-teams";
 import AlertModal from "@/src/components/alert-modal/alertModal";
 import { Match, MatchFinal, Team } from "@/src/interfaces/matchs";
 import { Picker } from "@react-native-picker/picker";
 import { Formik } from "formik";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Modal,
   ScrollView,
@@ -39,6 +43,7 @@ export default function MatchModal({
   const [showAlert, setShowAlert] = useState(false);
   const { findallTeam } = useAllTeams();
   const { findallTeam: findallTeamFinales } = useAllTeamsFinales();
+  const { findTeamQualified } = useTeamsQualifiedFinales(match?.homeTeam?.id);
   const { allGroupsQuery } = useGroups();
   const hasQualifiedTeams = (findallTeamFinales.data?.length || 0) > 0;
 
@@ -46,11 +51,36 @@ export default function MatchModal({
     (item, index, self) =>
       index === self.findIndex((t) => t.team.id === item.team.id),
   );
-  console.log("match ", match);
+  console.log("findTeamQualified ", findTeamQualified.data);
 
   const [checked, setChecked] = useState(false);
 
+  useEffect(() => {
+    if (match) {
+      setChecked(match.decided_by_penalties ?? false);
+    }
+  }, [match]);
+
   const [qualifiedTeamId, setQualifiedTeamId] = useState<number | null>(null);
+  const [matchPhaseFinal, setMatchPhaseFinal] = useState("");
+
+  useEffect(() => {
+    if (findTeamQualified.data?.team?.id) {
+      setQualifiedTeamId(findTeamQualified.data.team.id);
+    } else {
+      setQualifiedTeamId(null);
+    }
+  }, [findTeamQualified.data]);
+
+  useEffect(() => {
+    if (findTeamQualified.data?.team?.id) {
+      setMatchPhaseFinal(findTeamQualified.data.qualified_for_phase);
+    } else {
+      setMatchPhaseFinal("");
+    }
+  }, [findTeamQualified.data]);
+
+  // console.log("qualifiedTeamId ", qualifiedTeamId);
 
   const teamsOptions = hasQualifiedTeams
     ? uniqueTeams.map((item) => item.team)
@@ -186,6 +216,24 @@ export default function MatchModal({
     setShowAlert(true);
   };
 
+  const updateQualifiedTeam = (
+    homeScore: string,
+    awayScore: string,
+    homeTeam: string,
+    awayTeam: string,
+  ) => {
+    const home = Number(homeScore);
+    const away = Number(awayScore);
+
+    if (home > away) {
+      setQualifiedTeamId(Number(homeTeam));
+    } else if (away > home) {
+      setQualifiedTeamId(Number(awayTeam));
+    } else {
+      setQualifiedTeamId(null);
+    }
+  };
+
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.overlay}>
@@ -206,7 +254,7 @@ export default function MatchModal({
                 decided_by_penalties: match?.decided_by_penalties || false,
                 group: match?.group?.id?.toString() || "",
                 match_phase: match?.match_phase || "",
-                match_phase_final: "",
+                match_phase_final: matchPhaseFinal || "",
               }}
               enableReinitialize
               validationSchema={validationSchema}
@@ -327,16 +375,35 @@ export default function MatchModal({
                       placeholder="Local"
                       keyboardType="numeric"
                       value={values.homeScore}
-                      onChangeText={handleChange("homeScore")}
+                      onChangeText={(text) => {
+                        handleChange("homeScore")(text);
+
+                        updateQualifiedTeam(
+                          text,
+                          values.awayScore,
+                          values.homeTeam,
+                          values.awayTeam,
+                        );
+                      }}
                     />
                     <TextInput
                       style={styles.score}
                       placeholder="Visitante"
                       keyboardType="numeric"
                       value={values.awayScore}
-                      onChangeText={handleChange("awayScore")}
+                      onChangeText={(text) => {
+                        handleChange("awayScore")(text);
+
+                        updateQualifiedTeam(
+                          values.homeScore,
+                          text,
+                          values.homeTeam,
+                          values.awayTeam,
+                        );
+                      }}
                     />
                   </View>
+
                   <View
                     style={{
                       flexDirection: "row",
@@ -385,7 +452,7 @@ export default function MatchModal({
                     </>
                   )}
 
-                  {checked && (
+                  {values.homeScore !== "" && values.awayScore !== "" && (
                     <View
                       style={{
                         marginTop: 15,
