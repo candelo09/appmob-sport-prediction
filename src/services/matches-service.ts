@@ -74,3 +74,17 @@ export const updateMatch = async (id: number, match: Match) => {
     console.error(error);
   }
 };
+
+export const executeFunctionCalculatePointForPhaseGroup = async () => {
+  try {
+    const { data } = await sportPredictionApi.post<any>(
+      `finales/calculate-group-classification-points`,
+    );
+
+    const dataMatch: any = data;
+
+    return dataMatch;
+  } catch (error) {
+    console.error(error);
+  }
+};

@@ -1,3 +1,4 @@
+import { useFinalPointsPhase } from "@/hooks/use-finals";
 import useMatch, { useMatchs } from "@/hooks/use-matchs";
 import useSaveTeamsFinales from "@/hooks/use-teams";
 import MatchModalG from "@/src/components/match/MatchModalG";
@@ -51,8 +52,10 @@ export default function MatchScreen() {
   const [showModalCreateParticipant, setShowModalCreateParticipant] =
     useState(false);
   const [allMatch, setAllMatch] = useState<Match>({} as Match);
-  console.log("allMatch ", allMatch);
+  // console.log("allMatch ", allMatch);
   const { toCreateTeamFinal } = useSaveTeamsFinales();
+
+  const finalPointsPhase = useFinalPointsPhase();
 
   const [selectedMatch, setSelectedMatch] = useState(false);
   // const [flagModalAccountUpdate, setFlagModalAccountUpdate] = useState(false);
@@ -379,6 +382,17 @@ export default function MatchScreen() {
           </View>
         )}
       />
+
+      {/* BOTÓN CALCULAR PUNTOS */}
+      <TouchableOpacity
+        style={[styles.fab, { right: 95, backgroundColor: "#16a34a" }]}
+        onPress={async () => {
+          const response = await finalPointsPhase.mutateAsync();
+          alert(response.message);
+        }}
+      >
+        <Text style={{ color: "#fff", fontSize: 24 }}>🏆</Text>
+      </TouchableOpacity>
 
       {/* BOTÓN CREAR */}
       <TouchableOpacity

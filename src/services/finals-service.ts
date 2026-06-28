@@ -42,7 +42,7 @@ export const getFinalPhase = (match_phase: string): FinalPhase | undefined => {
 export const getFinalsMatches = async () => {
   const matches = await getAllMatches();
 
-  console.log("matches ", matches);
+  // console.log("matches ", matches);
 
   return (matches || []).filter((match: Match) =>
     getFinalPhase(match.match_phase),
