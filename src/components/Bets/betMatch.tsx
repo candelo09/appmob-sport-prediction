@@ -266,7 +266,7 @@ export default function MatchModal({
                               if (
                                 Number(valueHomeTeam) === Number(valueAwayTeam)
                               ) {
-                                setQualifiedTeamId(matchId.awayTeam.id);
+                                setQualifiedTeamId(matchId.homeTeam.id);
                               }
                             }
                       }
