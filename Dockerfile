@@ -8,6 +8,6 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 8082
+EXPOSE 8081
 
-CMD ["npx", "expo", "start", "--web", "--host", "lan", "--port", "8082"]
+CMD ["npx", "expo", "start", "--web", "--host", "lan", "--port", "8081"]

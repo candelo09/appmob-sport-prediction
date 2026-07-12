@@ -1,4 +1,6 @@
 import { Match } from "../interfaces/matchs";
+import { Podium } from "../interfaces/podium";
+import { sportPredictionApi } from "./api/sport-prediction-api";
 import { getAllMatches } from "./matches-service";
 
 export const FINAL_PHASES = [
@@ -47,4 +49,34 @@ export const getFinalsMatches = async () => {
   return (matches || []).filter((match: Match) =>
     getFinalPhase(match.match_phase),
   );
+};
+
+export const savePodium = async (podium: Podium) => {
+  try {
+    const { data } = await sportPredictionApi.post<Podium[]>(`/podium`, podium);
+
+    const resPodium = data;
+
+    // console.log(`predictions`, predictions);
+
+    return { resPodium };
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const getPodiumByParticipant = async (id_participant: number) => {
+  try {
+    const { data } = await sportPredictionApi.get<Podium>(
+      `podium/${id_participant}`,
+    );
+
+    const podiumParticipant = data;
+
+    // console.log(`matchs`, matchs);
+
+    return podiumParticipant;
+  } catch (error) {
+    console.error(error);
+  }
 };

@@ -3,11 +3,13 @@ import { TableRankingBets } from "@/src/components/rankingBets/tableRankingBets"
 import { useAuthContext } from "@/src/context/AuthContext";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import HomeScreen from "../Home/home";
 import LoginScreen from "../login/login";
+import PodiumPredictionScreen from "../podium/podium";
 import UserScreen from "../user/user";
 
 export default function TabLayout() {
@@ -34,6 +36,18 @@ export default function TabLayout() {
               headerShown: false,
               tabBarIcon: ({ color }) => (
                 <FontAwesome6 name="ranking-star" size={24} color="black" />
+              ),
+              headerStyle: { backgroundColor: "#474a50ff" },
+              headerTintColor: "#fff",
+            }}
+          />
+          <Tab.Screen
+            name="Podio"
+            component={PodiumPredictionScreen}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ color }) => (
+                <Ionicons name="podium-sharp" size={24} color="black" />
               ),
               headerStyle: { backgroundColor: "#474a50ff" },
               headerTintColor: "#fff",

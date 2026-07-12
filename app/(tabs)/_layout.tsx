@@ -12,6 +12,7 @@ import UserScreen from "../user/user";
 import { TableRankingBets } from "@/src/components/rankingBets/tableRankingBets";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import HomeScreen from "../Home/home";
+import PodiumPredictionScreen from "../podium/podium";
 // export const unstable_settings = {
 //   anchor: '(tabs)',
 // };
@@ -38,6 +39,18 @@ export default function RootLayout() {
           <Tab.Screen
             name="Ranking"
             component={TableRankingBets}
+            options={{
+              headerShown: false,
+              tabBarIcon: ({ color }) => (
+                <FontAwesome6 name="ranking-star" size={24} color="black" />
+              ),
+              headerStyle: { backgroundColor: "#474a50ff" },
+              headerTintColor: "#fff",
+            }}
+          />
+          <Tab.Screen
+            name="Podio"
+            component={PodiumPredictionScreen}
             options={{
               headerShown: false,
               tabBarIcon: ({ color }) => (

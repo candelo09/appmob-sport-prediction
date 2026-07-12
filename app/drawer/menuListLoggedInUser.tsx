@@ -11,6 +11,7 @@ import LoginScreen from "../login/login";
 import ParticipantStandingsTableScreen from "../manage-standings/ParticipantStandingsTable";
 import StandingsTableScreen from "../manage-standings/StandingsTable";
 import MatchScreen from "../matches/matches";
+import PodiumPredictionScreen from "../podium/podium";
 import ResultScreen from "../results/results";
 import UserScreen from "../user/user";
 
@@ -44,6 +45,12 @@ export default function DrawerNavigation() {
             component={ParticipantStandingsTableScreen}
             // initialParams={{ userId: user?.id || 0 }}
             options={{ headerTitle: "Clasificación Pronosticada" }}
+          />
+          <Drawer.Screen
+            name="Elige tu Podio"
+            component={PodiumPredictionScreen}
+            // initialParams={{ userId: user?.id || 0 }}
+            options={{ headerTitle: "Elige tu Podio" }}
           />
           {/* <Drawer.Screen
             name="Mis Predicciones"

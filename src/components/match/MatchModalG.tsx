@@ -64,6 +64,8 @@ export default function MatchModal({
   const [qualifiedTeamId, setQualifiedTeamId] = useState<number | null>(null);
   const [matchPhaseFinal, setMatchPhaseFinal] = useState("");
 
+  console.log("qualifiedTeamId ", qualifiedTeamId);
+
   useEffect(() => {
     if (findTeamQualified.data?.team?.id) {
       setQualifiedTeamId(findTeamQualified.data.team.id);
