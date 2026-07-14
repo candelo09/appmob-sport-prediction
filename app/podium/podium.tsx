@@ -12,6 +12,7 @@ export default function PodiumPredictionScreen() {
   const [thirdPlace, setThirdPlace] = useState<number | null>(null);
   const { user } = useAuthContext();
   const { toCreatePodium } = usePodium();
+  const [btnstate, setBtnState] = useState(false);
 
   const { podiumParticipantQuery } = usePodiumByParticipant(user?.id || 0);
 
@@ -40,18 +41,35 @@ export default function PodiumPredictionScreen() {
     (team) => team.id !== champion && team.id !== runnerUp,
   );
 
+  const closingDate = new Date("2026-07-14T14:00:00-05:00");
+
+  // const isClosed = new Date() >= closingDate;
+
+  const [isClosed, setIsClosed] = useState(new Date() >= closingDate);
+
+  useEffect(() => {
+    if (isClosed) return;
+
+    const timeout = setTimeout(() => {
+      setIsClosed(true);
+    }, closingDate.getTime() - Date.now());
+
+    return () => clearTimeout(timeout);
+  }, [isClosed]);
+
   useEffect(() => {
     if (podiumParticipantQuery.data) {
       setChampion(podiumParticipantQuery.data.champion_team_id);
       setRunnerUp(podiumParticipantQuery.data.runner_up_team_id);
       setThirdPlace(podiumParticipantQuery.data.third_place_team_id);
+      setBtnState(true);
     } else {
       setChampion(null);
       setRunnerUp(null);
       setThirdPlace(null);
     }
   }, [podiumParticipantQuery.data]);
-
+  console.log("button state ", btnstate);
   const savePrediction = () => {
     if (!champion || !runnerUp || !thirdPlace) {
       alert("Debes seleccionar el campeón, subcampeón y tercer lugar.");
@@ -154,7 +172,14 @@ export default function PodiumPredictionScreen() {
         </Picker>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={savePrediction}>
+      <TouchableOpacity
+        style={[
+          styles.button,
+          { backgroundColor: isClosed || btnstate ? "#9ca3af" : "#16a34a" },
+        ]}
+        onPress={savePrediction}
+        disabled={btnstate || isClosed}
+      >
         <Text style={styles.buttonText}>💾 Guardar Pronóstico</Text>
       </TouchableOpacity>
     </View>
